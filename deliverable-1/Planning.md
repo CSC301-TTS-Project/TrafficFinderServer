@@ -226,7 +226,7 @@ Here is a breakdown of the strengths and weaknesses of the individuals that comp
 #### **Sajjad:**
 
 
-#### Strengths
+Strengths:
 
 
 
@@ -236,8 +236,7 @@ Here is a breakdown of the strengths and weaknesses of the individuals that comp
     *   Motivated to ensure that all required details are met appropriately.
     *   Can clearly communicate ideas and intricacies.
 
-
-#### Weaknesses:** **
+Weaknesses:
 
 
 
@@ -250,7 +249,7 @@ Roles: Document Specialist, Full Stack Engineer: focus in backend.
 
 #### **Sarthak**:
 
-Strengths
+Strengths:
 
 
 
@@ -258,7 +257,7 @@ Strengths
 *   Composing Case studies and Market Analysis documents, and Pitch Decks
 *   Experience with Parallel programming using python libraries
 
-Weaknesses
+Weaknesses:
 
 
 
@@ -272,7 +271,7 @@ Weaknesses
 
 #### **Fernanda**
 
-Strengths
+Strengths:
 
 	
 
@@ -282,7 +281,7 @@ Strengths
 *   Breaking down problems. This can be in coding or for breaking down product requirements.
 *   Prioritization of tasks, creating a product roadmap
 
-Weaknesses
+Weaknesses:
 
 
 
@@ -295,7 +294,7 @@ Roles: Project manager, Full Stack Developer: General.
 
 #### **Kavan**
 
-Strengths
+Strengths:
 
 
 
@@ -303,7 +302,7 @@ Strengths
 *   Extensive backend experience designing, prototyping, and building large scalable solutions with native AWS
 *   Rapid onboarding/development
 
-Weaknesses
+Weaknesses:
 
 
 
@@ -316,7 +315,7 @@ Roles: Architecture Manager, Full Stack Developer: focus in backend.
 
 #### **Sherman**
 
-Strengths
+Strengths:
 
 
 
@@ -327,7 +326,7 @@ Strengths
 2. Wireframes and Mockups : Adobe XD, Figma
 3. Familiarity with Tailwind css 
 
-Weaknesses
+Weaknesses:
 
 
 
@@ -341,7 +340,7 @@ Weaknesses
 
 #### **Shisei **
 
-Strengths
+Strengths:
 
 
 
@@ -349,7 +348,7 @@ Strengths
 *   Ability to solve problems from both an engineering and business perspective.
 *   Familiarity with infrastructure engineering with AWS and GCP. 
 
-Weaknesses
+Weaknesses:
 
 
 
