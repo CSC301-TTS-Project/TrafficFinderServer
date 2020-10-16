@@ -1,50 +1,4 @@
-<!-- Copy and paste the converted output. -->
-
-<!-----
-NEW: Check the "Suppress top comment" option to remove this info from the output.
-
-Conversion time: 3.355 seconds.
-
-
-Using this Markdown file:
-
-1. Paste this output into your source file.
-2. See the notes and action items below regarding this conversion run.
-3. Check the rendered output (headings, lists, code blocks, tables) for proper
-   formatting and use a linkchecker before you publish this page.
-
-Conversion notes:
-
-* Docs to Markdown version 1.0β29
-* Fri Oct 16 2020 13:26:13 GMT-0700 (PDT)
-* Source doc: planning.md (final) template
-* This document has images: check for >>>>>  gd2md-html alert:  inline image link in generated source and store images to your server. NOTE: Images in exported zip file from Google Docs may not appear in  the same order as they do in your doc. Please check the images!
-
------>
-
-
-<p style="color: red; font-weight: bold">>>>>>  gd2md-html alert:  ERRORs: 0; WARNINGs: 0; ALERTS: 8.</p>
-<ul style="color: red; font-weight: bold"><li>See top comment block for details on ERRORs and WARNINGs. <li>In the converted Markdown or HTML, search for inline alerts that start with >>>>>  gd2md-html alert:  for specific instances that need correction.</ul>
-
-<p style="color: red; font-weight: bold">Links to alert messages:</p><a href="#gdcalert1">alert1</a>
-<a href="#gdcalert2">alert2</a>
-<a href="#gdcalert3">alert3</a>
-<a href="#gdcalert4">alert4</a>
-<a href="#gdcalert5">alert5</a>
-<a href="#gdcalert6">alert6</a>
-<a href="#gdcalert7">alert7</a>
-<a href="#gdcalert8">alert8</a>
-
-<p style="color: red; font-weight: bold">>>>>> PLEASE check and correct alert issues and delete this message and the inline alerts.<hr></p>
-
-
-
-# 
-
-<p id="gdcalert1" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image1.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert2">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image1.png "image_tooltip")
+![alt_text](./images/1.png)
 
 
 _Note:_ This document is meant to evolve throughout the planning phase of your project. That is, it makes sense for you to commit regularly to this file while working on the project (especially edits/additions/deletions to the _Highlights_ section). Most importantly, it is a reflection of all the planning you work you've done in the first iteration. This document will serve as a master plan between your team, your partner and your TA.
@@ -55,7 +9,7 @@ _Note:_ This document is meant to evolve throughout the planning phase of your p
 
 
 #### 
-**Q1: What are you planning to build? **Shisei
+**Q1: What are you planning to build?**
 
 Short (1 - 2 min' read)
 
@@ -79,19 +33,14 @@ Our solution is security focused as an important reason for the incumbent strate
 
 UI screen for selecting a route and time range to get traffic data from:
 
-
-
-<p id="gdcalert2" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image2.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert3">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image2.png "image_tooltip")
+![alt_text](images/2.png "image_tooltip")
    
 
-Full mock-ups can be found at: [https://www.figma.com/file/f83Wa2hfirGbhqqFviZTni/Toronto-Big-data?node-id=0%3A1](https://www.figma.com/file/f83Wa2hfirGbhqqFviZTni/Toronto-Big-data?node-id=0%3A1) 
+[Figma Mockup](https://www.figma.com/file/f83Wa2hfirGbhqqFviZTni/Toronto-Big-data?node-id=0%3A1) 
 
 
 #### 
-**Q2: Who are your target users? **Shisei and Fernanda
+**Q2: Who are your target users?**
 
 Short (1 - 2 min' read max)
 
@@ -103,17 +52,12 @@ You can create your personas as part of this Markdown file, or add a link to an 
 
 There are two groups of target users. Firstly, internal data requesters, both from the Toronto Big Data Innovation Team at the City of Toronto, as well from other teams at the same organization. Secondly, external consultants who use traffic data from the city for their own projects. Neither of these groups of users should be assumed to have a technical background. Therefore, there shouldn’t be technical terms such as SQL terminology, and the application should be self-service, which means that a user should be able to perform data requests on their own, without assistance from someone who has worked more closely with this data or the platform. Furthermore, an important characteristic of the users is they submit these traffic data requests in order to use the data for their consulting projects, which revolve around areas such as transportation in the city, policy intervention, monitoring of security infrastructure, collision prevention, among others. In such a way, the users’ goals are mainly to easily obtain the traffic data they need, as well specific metrics for it such as average travel time, min/max values, etc. This would allow users to gain insight into the data through an intuitive, self-service tool.
 
-
-
-<p id="gdcalert3" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image3.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert4">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image3.png "image_tooltip")
+![alt_text](./images/3.png)
 
 
 
 #### 
-**Q3: Why would your users choose your product? What are they using today to solve their problem/need? **Sajjad
+**Q3: Why would your users choose your product? What are they using today to solve their problem/need?**
 
 Short (1 - 2 min' read max)
 
@@ -133,7 +77,7 @@ The application will save the time of users in multiple ways: Firstly, since the
 
 
 #### 
-**Q4: How will you build it? **Kavan and Sarthak
+**Q4: How will you build it?**
 
 Short (1-2 min' read max)
 
@@ -149,12 +93,7 @@ We plan on making use of AWS as our primary cloud service provider for both buil
 
 Our frontend tech stack consists of React/Redux with Material UI components. Mapping components will be built atop of MapBox, with either an inhouse date selection component or react-calendar. Our backend will use Django, with boto3 (AWS python SDK) and postgres (with PostGIS and pgRouting) with the psycopg2 driver.
 
-
-
-<p id="gdcalert4" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image4.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert5">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image4.png "image_tooltip")
+![alt_text](images/4.png "image_tooltip")
 
 
 On the server side, we have a basic request driven architecture. At a high level, we use read-only data from our RDS database to create Nodes and construct routes which persist in our DynamoDB. IDs pertaining to these routes are passed with additional metadata (time-windows, file format, etc) to form traffic data requests which return data in a format specified by the user. Requests that update the route in the backend or create a new route also update the view using data from the response body. Pathfinding related logic will mostly be handled by pgRouting. We also have a [Figma mockup](https://www.figma.com/file/f83Wa2hfirGbhqqFviZTni/Toronto-Big-data?node-id=0%3A1) available for the frontend.
@@ -165,7 +104,7 @@ A full architectural design document with in-depth details can be found [here](h
 
 
 #### 
-**Q5: What are the user stories that make up the MVP? - **Fernanda
+**Q5: What are the user stories that make up the MVP?**
 
 
 
@@ -422,7 +361,7 @@ Roles: UI/UX Designer, Full Stack developer: focus in frontend.
 
 
 #### 
-**Q7: What operational events will you have as a team? **Sarthak
+**Q7: What operational events will you have as a team?**
 
 Our team is planning on having weekly or bi-weekly sprints (depending on workload of current sprint). Sprints will be constructed by segmenting MVP tasks and will be modified to be in line with deliverable expectations. We will be developing in an AGILE environment using Trello boards to assign tasks. Currently our task board is set up to have the following lists: Todo, In Progress, Completed, Backlog. The first 3 categories are straightforward, the Backlog board is used to highlight any tickets which are stopping other dev teams from completing their assignments. This board is thus critical to stopping bottlenecks. The ticketing system is explained below:
 
@@ -440,13 +379,11 @@ Our second meeting included pitching our prototyped app to the partner and gaini
 
 We will be meeting our partner before and after every sprint cycle to update the partner on our progress and let him know about next steps. Meeting minutes are maintained in the below document and the document also contains minutes for the first 2 meetings.
 
-Link to Meeting Minutes Document: 
-
-[https://docs.google.com/document/d/1fhNuVtA0MuVoDgApVCfUXQJ54Ei72pB9AU3sGjZPtao/edit?usp=sharing](https://docs.google.com/document/d/1fhNuVtA0MuVoDgApVCfUXQJ54Ei72pB9AU3sGjZPtao/edit?usp=sharing) 
+[Meeting Minutes Document](https://docs.google.com/document/d/1fhNuVtA0MuVoDgApVCfUXQJ54Ei72pB9AU3sGjZPtao/edit?usp=sharing )
 
 
 #### 
-**Q8: What artifacts will you use to self-organize? **Sarthak
+**Q8: What artifacts will you use to self-organize?**
 
 List/describe the artifacts you will produce in order to organize your team.
 
@@ -465,22 +402,12 @@ Tasks are designated via Trello by the Project Manager and assigned to developer
 
 Slack Channels Setup:
 
-
-
-<p id="gdcalert5" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image5.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert6">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image5.png "image_tooltip")
+![alt_text](images/5.png "image_tooltip")
 
 
 Trello Board Setup:
 
-
-
-<p id="gdcalert6" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image6.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert7">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image6.png "image_tooltip")
+![alt_text](images/6.png "image_tooltip")
 
 
 
@@ -489,7 +416,7 @@ Trello Board Setup:
 
 Describe your team's working culture.
 
-Communications: Sajjad
+Communications:
 
 
 
@@ -502,7 +429,7 @@ The protocol on our communications is as follows: Everyone is expected to check 
 
 In a partner project such as ours, communication with the partner is vital to a successful delivery of their envisioned product. The process of communication with the partner is as follows: Adding the partner to our Slack channel, meeting with the partner at least once every two week (using the partners chosen platform: Cisco’s Webex), a singular point of reference for emails/questions/concerns (the project manager). This procedure ensures that the partner is constantly involved in the project, allows them to give input or suggest improvements as per their requirements, and there is a consistent/clear path of communication with them.
 
-Meetings: Sajjad
+Meetings:
 
 
 
@@ -512,15 +439,10 @@ Our meeting schedule and timings are governed by common availability throughout 
 
 <span style="text-decoration:underline;">Example when2meet: </span>
 
+![alt_text](images/7.png "image_tooltip")
 
 
-<p id="gdcalert7" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image7.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert8">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image7.png "image_tooltip")
-
-
-Conflict Resolution: Kavan
+Conflict Resolution:
 
 
 
@@ -539,7 +461,7 @@ Conflict Resolution: Kavan
 
 
 ### 
-**Highlights - **Sajjad
+**Highlights**
 
 Specify 3 - 5 key decisions and/or insights that came up during your meetings and/or collaborative process.
 
@@ -565,12 +487,7 @@ Furthermore when facing contentious decisions we took many different factors int
 
 1 Indicates that the project is the number 1 choice. 
 
-
-
-<p id="gdcalert8" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image8.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert9">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image8.png "image_tooltip")
+![alt_text](images/8.png "image_tooltip")
 
 
 **<span style="text-decoration:underline;"> \
