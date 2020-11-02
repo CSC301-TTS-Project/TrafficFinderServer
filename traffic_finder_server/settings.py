@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import configparser
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -72,12 +73,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
-if 'RDS_HOSTNAME' in os.environ:
-    #Defined on Elastic Beanstalk EC2 Instances
+if 'PROD' in os.environ:
+    #Configured on Elastic Beanstalk EC2 Instances
     DATABASES = {
         #USE RDS; Should be read only.
         'default': {
@@ -89,17 +88,28 @@ if 'RDS_HOSTNAME' in os.environ:
             'PORT': os.environ['RDS_PORT']
         }
     }
-else: 
+    USE_LOCAL_DDB = False
+    LOCAL_DDB_ENDPOINT = None
+else:
+    #Read Local Config
+    config = configparser.ConfigParser()
+    config.read('config/local.ini')
+
     DATABASES = {
     'default': {
         #DEFAULT TO LOCAL POSTGRES
         #SETUP YOUR OWN LOCAL DB
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'trafficfinderroutes',
+        'NAME': config['POSTGRES']['NAME'],
+        'USER': config['POSTGRES']['USER'],
+        'PASSWORD': config['POSTGRES']['PASSWORD']
         'TEST': {
-            'Name': 'trafficfinderroutestest'
+            'Name': config['postgres']['TEST_NAME']
         }
     }
+
+    USE_LOCAL_DDB = True
+    LOCAL_DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
 }
 
 # Password validation
