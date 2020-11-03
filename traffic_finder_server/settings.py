@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import configparser
 import os
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,16 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-
-# TODO: Regenerate and hide secret
-SECRET_KEY = '@%sd)$e!i@@mwjrrbce^upr&v+7$nzhs$%omd2*q8$t16lqz-0'
+SECRET_KEY = os.environ.get('DJANGO_SECRET')
+if not SECRET_KEY:
+    SECRET_KEY = get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not 'PROD' in os.environ
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -40,8 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django_nose'
 ]
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -93,24 +94,22 @@ if 'PROD' in os.environ:
 else:
     #Read Local Config
     config = configparser.ConfigParser()
-    config.read('config/local.ini')
-
+    config.read('traffic_finder_server/config/local.ini')
     DATABASES = {
-    'default': {
-        #DEFAULT TO LOCAL POSTGRES
-        #SETUP YOUR OWN LOCAL DB
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config['POSTGRES']['NAME'],
-        'USER': config['POSTGRES']['USER'],
-        'PASSWORD': config['POSTGRES']['PASSWORD']
-        'TEST': {
-            'Name': config['postgres']['TEST_NAME']
+        'default': {
+            #DEFAULT TO LOCAL POSTGRES
+            #SETUP YOUR OWN LOCAL DB
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config['POSTGRES']['NAME'],
+            'USER': config['POSTGRES']['USER'],
+            'PASSWORD': config['POSTGRES']['PASSWORD'],
+            'TEST': {
+                'NAME': config['POSTGRES']['TEST_NAME']
+            }
         }
     }
-
     USE_LOCAL_DDB = True
     LOCAL_DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -143,9 +142,3 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
-STATIC_URL = '/static/'

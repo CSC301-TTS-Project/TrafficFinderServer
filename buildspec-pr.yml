@@ -8,6 +8,7 @@ phases:
       - pip install -r requirements.txt
   build:
     commands:
+      - pylint --load-plugins pylint_django traffic_finder_server api
       - python manage.py test
   post_build:
     commands:
