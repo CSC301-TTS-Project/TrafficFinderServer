@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django_nose'
+    'django_nose',
+    'django.contrib.gis',
+    'api'
 ]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -99,10 +101,8 @@ else:
         'default': {
             #DEFAULT TO LOCAL POSTGRES
             #SETUP YOUR OWN LOCAL DB
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': config['POSTGRES']['NAME'],
-            'USER': config['POSTGRES']['USER'],
-            'PASSWORD': config['POSTGRES']['PASSWORD'],
             'TEST': {
                 'NAME': config['POSTGRES']['TEST_NAME']
             }
