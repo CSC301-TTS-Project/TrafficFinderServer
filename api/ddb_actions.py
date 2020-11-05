@@ -50,14 +50,14 @@ def _get_table():
             table.wait_until_exists()
     return table
 
-
+#TODO: return NONE on non-existing record
 def get_route_record(user_id, route):
     response = _get_table().get_item(Key={'UserId': user_id, 'Route': route})
     # Return a dictionary of the segments and their lengths
     return dict((k, response[k]) for k in response.keys()
                 if k not in ('UserId', 'Route'))
 
-
+#TODO: return NONE on non-existing segment
 def get_segment(user_id, route, segment_id):
     return _get_table().get_item(
         Key={
@@ -67,7 +67,7 @@ def get_segment(user_id, route, segment_id):
         ProjectionExpression=
         f'segment_{segment_id}", segment_{segment_id}_length')
 
-
+#TODO: shuffle down indexes on delete, eg given segments {0, 1, 2, 3} -> delete 2 -> {0, 1, 2}
 def update_route_record(user_id, route, segment_id, nodes, delete=False):
     if delete:
         _get_table().update_item(Key={
