@@ -46,9 +46,9 @@ def _get_table():
                 TableName=_DDB_TABLE_NAME,
             )
         finally:
-            table = _get_ddb().Table(_DDB_TABLE_NAME)
-            table.wait_until_exists()
-    return table
+            _table = _get_ddb().Table(_DDB_TABLE_NAME)
+            _table.wait_until_exists()
+    return _table
 
 #TODO: return NONE on non-existing record
 def get_route_record(user_id, route):
