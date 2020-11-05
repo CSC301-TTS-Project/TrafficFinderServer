@@ -1,5 +1,6 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 import json
+from ddb_actions import get_route_record
 
 def index(request):
     return HttpResponse()
@@ -9,7 +10,6 @@ def getRoute(request):
     json_data = json.loads(request.body)
     try:
         route = json_data["route"]
-        #TODO: fill this
     except KeyError:
         HttpResponseBadRequest("Malformed Input")
     return HttpResponse()

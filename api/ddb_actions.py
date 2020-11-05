@@ -47,8 +47,10 @@ def _get_table():
     return table
 
 def get_route_record(user_id, route):
-    raise NotImplementedError
+    response = _get_table().get_item(Key={'UserId': user_id, 'Route': route})
+    return response
+    
 
-def update_route_record(user_id, route, node_dict):
+def update_route_record(user_id, route, node_dict, delete=False):
     raise NotImplementedError
 
