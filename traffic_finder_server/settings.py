@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django_nose',
     'django.contrib.gis',
-    'api'
+    'api',
+    'rest_framework'
 ]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -91,8 +92,7 @@ if 'PROD' in os.environ:
             'PORT': os.environ['RDS_PORT']
         }
     }
-    USE_LOCAL_DDB = False
-    LOCAL_DDB_ENDPOINT = None
+    DDB_ENDPOINT = None
 else:
     #Read Local Config
     config = configparser.ConfigParser()
@@ -108,8 +108,7 @@ else:
             }
         }
     }
-    USE_LOCAL_DDB = True
-    LOCAL_DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
+    DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
