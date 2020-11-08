@@ -97,6 +97,7 @@ def deleteNode(request):
         return HttpResponseBadRequest("Malformed Input")
 
 # HARD CODED VARIANTS BELOW
+# =======================DELETE ALL OF BELOW IN FINAL==========================
 
 
 def hdc_index(request):
@@ -105,7 +106,12 @@ def hdc_index(request):
 
 def hdc_getRoute(request):
     """ Expect the json fields route. """
-    pass
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
+    except KeyError:
+        return HttpResponseBadRequest("Malformed Input")
 
 
 def hdc_insertNode(request):
@@ -115,13 +121,13 @@ def hdc_insertNode(request):
         lat = json_data["lat"]
         lng = json_data["lng"]
         segment_idx = json_data["index"]
-        return JsonResponse(json.dumps(ret_json))
+        return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
     except KeyError:
         return HttpResponseBadRequest("Malformed Input")
 
 
 def hdc_modifyNode(request):
-    return HttpResponse()
+    return HttpResponse("Modified Node")
 
 
 def hdc_deleteNode(request):
@@ -129,6 +135,55 @@ def hdc_deleteNode(request):
     try:
         route = json_data["route"]
         segment_idx = json_data["index"]
-        return JsonResponse(ret_json)
+        return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
     except KeyError:
+        return HttpResponseBadRequest("Malformed Input")
+
+
+def hdc_addNodeToRoute(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        lat = json_data["lat"]
+        lng = json_data["lng"]
+        assert isinstance(lat, float) and isinstance(lng, float) and isinstance(
+            segment_idx, int) and isinstance(route, int)
+        return JsonResponse(json.dumps([{"id": 123, "lat": 43.651072, "lng": -79.347016}, {"id": 12, "lat": 43.651070, "lng": -79.347015}, {"id": 17, "lat": lat, "lng": lng}]), safe=False)
+    except (KeyError, AssertionError):
+        return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index, lat, lng")
+
+
+def hdc_modifyRouteNode(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        lat = json_data["lat"]
+        lng = json_data["lng"]
+        assert isinstance(lat, float) and isinstance(lng, float) and isinstance(
+            segment_idx, int) and isinstance(route, int)
+        return JsonResponse(json.dumps([{"index": 1, "id": 123, "lat": 43.651072, "lng": -79.347016}, {"index": 2, "id": 12, "lat": 43.651070, "lng": -79.347015}, {"index": 3, "id": 17, "lat": lat, "lng": lng}]), safe=False)
+    except (KeyError, AssertionError):
+        return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index, lat, lng")
+
+
+def hdc_deleteRouteNode(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        assert isinstance(segment_idx, int) and isinstance(route, int)
+        return JsonResponse(json.dumps([{"index": 1, "id": 123, "lat": 43.651072, "lng": -79.347016}, {"index": 2, "id": 12, "lat": 43.651070, "lng": -79.347015}]), safe=False)
+    except (KeyError, AssertionError):
+        return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index")
+
+
+def hdc_getTrafficData(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        assert isinstance(route, int)
+        return HttpResponse("0, 1, 2, 3, 4, 5\n6, 7, 8, 9, 10, 11\n12, 13, 14, 15, 16, 17, 18")
+    except (KeyError, AssertionError):
         return HttpResponseBadRequest("Malformed Input")
