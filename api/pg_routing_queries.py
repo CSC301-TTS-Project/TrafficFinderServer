@@ -1,6 +1,7 @@
 from .models import Node, Link, TravelTime
 
-SRID = 4326 #WGS84, GPS Coordinates etc
+SRID = 4326  # WGS84, GPS Coordinates etc
+
 
 def shortest_route(start, end):
     """ Get the nodes corresponding the the shortest route between two nodes start and end """
