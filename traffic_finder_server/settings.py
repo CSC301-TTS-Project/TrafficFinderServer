@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -80,9 +80,9 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if 'PROD' in os.environ:
-    #Configured on Elastic Beanstalk EC2 Instances
+    # Configured on Elastic Beanstalk EC2 Instances
     DATABASES = {
-        #USE RDS; Should be read only.
+        # USE RDS; Should be read only.
         'default': {
             'ENGINE': 'django.db.backends.',
             'NAME': os.environ['RDS_DB_NAME'],
@@ -94,13 +94,13 @@ if 'PROD' in os.environ:
     }
     DDB_ENDPOINT = None
 else:
-    #Read Local Config
+    # Read Local Config
     config = configparser.ConfigParser()
     config.read('traffic_finder_server/config/local.ini')
     DATABASES = {
         'default': {
-            #DEFAULT TO LOCAL POSTGRES
-            #SETUP YOUR OWN LOCAL DB
+            # DEFAULT TO LOCAL POSTGRES
+            # SETUP YOUR OWN LOCAL DB
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': config['POSTGRES']['NAME'],
             'TEST': {
