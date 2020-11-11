@@ -1,8 +1,8 @@
 from django.conf import settings
 import boto3
-import json
 import pickle
 import copy
+import uuid
 
 # Change with config later
 _DDB_ROUTE_TABLE_NAME = 'trafficfinder-route-dev'
@@ -35,7 +35,7 @@ def _get_route_table():
                     },
                     {
                         'AttributeName': 'SegmentIds',
-                        'AttributeType': 'SS'
+                        'AttributeType': 'L'
                     },
                 ],
                 KeySchema=[
@@ -60,7 +60,7 @@ def _get_route_table():
     return _route_table
 
 
-def _get_sequence_table():
+def _get_segment_table():
     global _sequence_table
     if not _sequence_table:
         try:
@@ -72,7 +72,7 @@ def _get_sequence_table():
                     },
                     {
                         'AttributeName': 'Segment',
-                        'AttributeType': 'BS'
+                        'AttributeType': 'L'
                     }
                 ],
                 KeySchema=[
@@ -131,35 +131,57 @@ def get_route_segments(segment_ids):
         if "UnprocessedKeys" in response.keys():
             unprocessed_keys = copy.deepcopy(response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"])
         for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
-            segments[item["SegmentId"]] = pickle.loads(item["Segment"])
+            segments[item["SegmentId"]] = [pickle.loads(node) for node in item["Segment"]]
     return [segments[segment_id] for segment_id in segment_ids]
 
-def update_route_record(user_id, route, segment_id, nodes, delete=False):
-    if delete:
-        _get_route_table().update_item(Key={
+
+def add_segment_to_route_record(user_id, route, nodes):
+    new_segment_id = str(uuid.uuid4())
+    _get_segment_table().put_item(
+        Item={
+            'SegmentId': new_segment_id,
+            'Segment:': set([pickle.dumps(node) for node in nodes])
+        }
+    )
+    new_segment_list = get_route_record(user_id, route)
+    new_segment_list += [new_segment_id]
+    _get_route_table().update_item(
+        Key={
             'UserId': user_id,
             'Route': route
         },
-            AttributeUpdates={
-                f"segment_{segment_id}": {
-                    'Action': 'DELETE'
-                },
-                f"segment_{segment_id}_length": {
-                    'Action': 'DELETE'
-                }
-            })
-    else:
-        _get_route_table().update_item(Key={
+        AttributeUpdates={
+            'SegmentIds': new_segment_list
+        }
+    )
+
+
+def update_route_record(user_id, route, index, nodes, delete=False):
+    new_segment_id = str(uuid.uuid4())
+
+    _get_segment_table().put_item(
+        Item={
+            'SegmentId': new_segment_id,
+            'Segment:': set([pickle.dumps(node) for node in nodes])
+        }
+    )
+
+    new_segment_list = get_route_record(user_id, route)
+    old_segment_id = new_segment_list[index]
+    new_segment_list[index] = new_segment_id
+    _get_route_table().update_item(
+        Key={
             'UserId': user_id,
             'Route': route
         },
-            AttributeUpdates={
-                f"segment_{segment_id}": {
-                    'Value': json.dump(nodes),
-                    'Action': 'SET'
-                },
-                f"segment_{segment_id}_length": {
-                    'Value': len(nodes),
-                    'Action': 'SET'
-                }
-            })
+        AttributeUpdates={
+            'SegmentIds': new_segment_list
+        }
+    )
+
+    # delete old segment id
+    _get_segment_table().delete_item(
+        Key={
+            'SegmentId': old_segment_id
+        }
+    )
