@@ -10,12 +10,9 @@ import logging
 USER = settings.DEFAULT_DDB_USER_ID
 
 log = logging.getLogger(__name__)
-logging.disable(logging.NOTSET)
-log.setLevel(logging.DEBUG)
 
 def index(request):
     return HttpResponse("Hello World!")
-
 
 def get_route(request):
     """ Expect the json field route """
@@ -25,7 +22,8 @@ def get_route(request):
         route = int(json_data["route"])
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
-        return JsonResponse(json.dumps(route_segments), safe=False)
+        log.debug(json.dumps(route_segments))
+        return JsonResponse({"Route": route_segments}, safe=False)
     except KeyError as e:
         log.error(f"Got the following error during get_route {e}")
         return HttpResponseBadRequest("Malformed Input")
