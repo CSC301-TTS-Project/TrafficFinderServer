@@ -93,7 +93,7 @@ def _get_segment_table():
     return _sequence_table
 
 
-def get_route_record(user_id, route):
+def get_route_segment_ids(user_id, route):
     """
     Get an ordered list of segment ids pertaining to the passed route for the given user.
 
@@ -135,7 +135,7 @@ def get_route_segments(segment_ids):
     return [segments[segment_id] for segment_id in segment_ids]
 
 
-def add_segment_to_route_record(user_id, route, nodes):
+def insert_segment_in_route_record(user_id, index, route, nodes):
     new_segment_id = str(uuid.uuid4())
     _get_segment_table().put_item(
         Item={
@@ -143,8 +143,8 @@ def add_segment_to_route_record(user_id, route, nodes):
             'Segment:': set([pickle.dumps(node) for node in nodes])
         }
     )
-    new_segment_list = get_route_record(user_id, route)
-    new_segment_list += [new_segment_id]
+    new_segment_list = get_route_segment_ids(user_id, route)
+    new_segment_list.insert(index, new_segment_id)
     _get_route_table().update_item(
         Key={
             'UserId': user_id,
@@ -156,7 +156,7 @@ def add_segment_to_route_record(user_id, route, nodes):
     )
 
 
-def update_route_record(user_id, route, index, nodes, delete=False):
+def update_segment_in_route_record(user_id, route, index, nodes):
     new_segment_id = str(uuid.uuid4())
 
     _get_segment_table().put_item(
@@ -166,7 +166,7 @@ def update_route_record(user_id, route, index, nodes, delete=False):
         }
     )
 
-    new_segment_list = get_route_record(user_id, route)
+    new_segment_list = get_route_segment_ids(user_id, route)
     old_segment_id = new_segment_list[index]
     new_segment_list[index] = new_segment_id
     _get_route_table().update_item(
@@ -183,5 +183,16 @@ def update_route_record(user_id, route, index, nodes, delete=False):
     _get_segment_table().delete_item(
         Key={
             'SegmentId': old_segment_id
+        }
+    )
+
+
+def delete_segment_from_route_record(user_id, route, index):
+    segment_list = get_route_segment_ids(user_id, route)
+    segment_id_to_remove = segment_list.pop(index)
+
+    _get_segment_table().delete_item(
+        Key={
+            'SegmentId': segment_id_to_remove
         }
     )
