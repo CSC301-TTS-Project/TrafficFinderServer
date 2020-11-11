@@ -10,6 +10,8 @@ import logging
 USER = settings.DEFAULT_DDB_USER_ID
 
 log = logging.getLogger(__name__)
+logging.disable(logging.NOTSET)
+log.setLevel(logging.DEBUG)
 
 def index(request):
     return HttpResponse("Hello World!")
@@ -20,12 +22,10 @@ def get_route(request):
     log.debug("Received [GET] get_route")
     try:
         json_data = json.loads(request.body)
-        log.debug(f"get_route json body: {json_data}")
-        print(json_data)
-        route = json_data["route"]
+        route = int(json_data["route"])
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
-        return JsonResponse(route_segments)
+        return JsonResponse(json.dumps(route_segments), safe=False)
     except KeyError as e:
         log.error(f"Got the following error during get_route {e}")
         return HttpResponseBadRequest("Malformed Input")
@@ -34,9 +34,9 @@ def get_route(request):
 def insert_node(request):
     try:
         json_data = json.loads(request.body)
-        route = json_data["route"]
-        lat = json_data["lat"]
-        lng = json_data["lng"]
+        route = int(json_data["route"])
+        lat = float(json_data["lat"])
+        lng = float(json_data["lng"])
         segment_idx = json_data["index"]
         new_node = nearest_node(lat, lng)
         if segment_idx == 0:

@@ -22,7 +22,7 @@ def main():
 
     is_testing = 'test' in sys.argv
     if is_testing:
-        cov = coverage.coverage(source=['app'], omit=['*/tests/*'])
+        cov = coverage.coverage(source=['api'], omit=['*/tests/*'])
         cov.set_option('report:show_missing', True)
         cov.erase()
         cov.start()

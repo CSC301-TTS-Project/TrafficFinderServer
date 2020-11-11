@@ -1,17 +1,22 @@
-from django.test import TestCase
 from api.ddb_actions import reset
+from django.test import TestCase, Client
+from django.test.utils import override_settings
+import json
 
 import logging
-logger = logging.getLogger(__name__)
+
+log = logging.getLogger(__name__)
 logging.disable(logging.NOTSET)
-logger.setLevel(logging.DEBUG)
+log.setLevel(logging.DEBUG)
 
 
+@override_settings(DEBUG=True)
 class ViewTest(TestCase):
     def tearDown(self):
         reset()
 
     def test_get_route(self):
-        logger.log("TEST")
-        response = self.client.get('/getRoute', {'route': 0})
-        assert response.status_code == 200
+        client = Client()
+        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        self.assertEqual(response.status_code, 200)
+

@@ -1,8 +1,10 @@
 from django.conf import settings
 import boto3
+from boto3.dynamodb.types import TypeSerializer
 import pickle
 import copy
 import uuid
+import botocore.exceptions
 
 # Change with config later
 _DDB_ROUTE_TABLE_NAME = settings.DDB_ROUTE_TABLE_NAME
@@ -11,6 +13,7 @@ _DDB_SEGMENT_TABLE_NAME = settings.DDB_SEGMENT_TABLE_NAME
 _ddb = None
 _route_table = None
 _sequence_table = None
+serializer = TypeSerializer()
 
 
 def _get_ddb():
@@ -33,11 +36,7 @@ def _get_route_table(reset_table=False):
                     {
                         'AttributeName': 'Route',
                         'AttributeType': 'N',
-                    },
-                    {
-                        'AttributeName': 'SegmentIds',
-                        'AttributeType': 'L'
-                    },
+                    }
                 ],
                 KeySchema=[
                     {
@@ -47,7 +46,7 @@ def _get_route_table(reset_table=False):
                     {
                         'AttributeName': 'Route',
                         'KeyType': 'RANGE',
-                    },
+                    }
                 ],
                 ProvisionedThroughput={
                     'ReadCapacityUnits': 5,
@@ -55,6 +54,9 @@ def _get_route_table(reset_table=False):
                 },
                 TableName=_DDB_ROUTE_TABLE_NAME,
             )
+        except _get_ddb().meta.client.exceptions.ResourceInUseException:
+            # table has already been created
+            pass
         finally:
             _route_table = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
             _route_table.wait_until_exists()
@@ -62,9 +64,9 @@ def _get_route_table(reset_table=False):
             # initialize default route; implementation will change for deliverable 3
             _route_table.put_item(
                 Item={
-                    "UserId": settings.DEFAULT_USER,
+                    "UserId": settings.DEFAULT_DDB_USER_ID,
                     "Route": settings.DEFAULT_ROUTE,
-                    "SegmentIDs": []
+                    "SegmentIds": []
                 }
             )
     return _route_table
@@ -79,10 +81,6 @@ def _get_segment_table(reset_table=False):
                     {
                         'AttributeName': 'SegmentId',
                         'AttributeType': 'S'
-                    },
-                    {
-                        'AttributeName': 'Segment',
-                        'AttributeType': 'L'
                     }
                 ],
                 KeySchema=[
@@ -93,10 +91,13 @@ def _get_segment_table(reset_table=False):
                 ],
                 ProvisionedThroughput={
                     'ReadCapacityUnits': 5,
-                    'WriteCapacityUnits': 5,
+                    'WriteCapacityUnits': 5
                 },
                 TableName=_DDB_SEGMENT_TABLE_NAME,
             )
+        except _get_ddb().meta.client.exceptions.ResourceInUseException:
+            # table has already been created
+            pass
         finally:
             _sequence_table = _get_ddb().Table(_DDB_SEGMENT_TABLE_NAME)
             _sequence_table.wait_until_exists()
@@ -111,7 +112,9 @@ def get_route_segment_ids(user_id, route):
     @param route: id of the route
     @return: ordered list of segment ids
     """
-    response = _get_route_table().get_item(Key={'UserId': user_id, 'Route': route}, ConsistentRead=True)
+    response = _get_route_table().get_item(
+        Key={'UserId': user_id, 'Route': route},
+        ConsistentRead=True)
     if "Item" in response.keys():
         return response['Item']['SegmentIds']
     return []
@@ -124,7 +127,7 @@ def get_route_segments(segment_ids):
     @return: ordered list of segments (2D List of nodes)
     """
     # make sure table is active
-    _get_ddb().Table(_DDB_SEGMENT_TABLE_NAME).wait_until_exists()
+    _get_segment_table()
 
     # batch_get_items doesn't guarantee order. Index segments to a dict first
     segments = {}
@@ -133,7 +136,7 @@ def get_route_segments(segment_ids):
         response = _get_ddb().batch_get_item(
             RequestItems={
                 _DDB_SEGMENT_TABLE_NAME: {
-                    'Keys': [{'SegmentId': {'S': key}} for key in unprocessed_keys],
+                    'Keys': [{'SegmentId': key} for key in unprocessed_keys],
                     'ConsistentRead': True
                 }
             }
