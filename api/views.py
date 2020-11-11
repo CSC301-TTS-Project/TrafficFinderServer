@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
 import json
-from .ddb_actions import get_route_record, update_route_record, get_segment
+from .ddb_actions import get_route_record, update_route_record
 from .pg_routing_queries import shortest_route, nearest_node
 
 # Set this in config, should be set using auth header later

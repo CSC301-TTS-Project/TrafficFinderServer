@@ -7,7 +7,8 @@ def shortest_route(start, end):
     """ Get the nodes corresponding the the shortest route between two nodes start and end """
 
     nodes = Node.objects.raw(
-        f"SELECT * FROM nodes NATURAL RIGHT JOIN (SELECT node as node_id from pgr_dijkstra(\'SELECT id, source, target, length as cost FROM links\', {start.node_id}, {end.node_id})) AS path"
+        f"SELECT * FROM nodes NATURAL RIGHT JOIN (SELECT node as node_id from pgr_dijkstra(\'SELECT id, source, "
+        f"target, length as cost FROM links\', {start.node_id}, {end.node_id})) AS path "
     )
     return nodes
 

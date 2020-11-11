@@ -1,11 +1,16 @@
 from django.conf import settings
 import boto3
 import json
+import pickle
+import copy
 
 # Change with config later
-_DDB_TABLE_NAME = 'trafficfinder-dev'
+_DDB_ROUTE_TABLE_NAME = 'trafficfinder-route-dev'
+_DDB_SEGMENT_TABLE_NAME = 'trafficfinder-sequence-dev'
 _ddb = None
-_table = None
+_route_table = None
+_sequence_table = None
+
 
 def _get_ddb():
     global _ddb
@@ -14,9 +19,9 @@ def _get_ddb():
     return _ddb
 
 
-def _get_table():
-    global _table
-    if not _table:
+def _get_route_table():
+    global _route_table
+    if not _route_table:
         try:
             _get_ddb().create_table(
                 AttributeDefinitions=[
@@ -27,6 +32,10 @@ def _get_table():
                     {
                         'AttributeName': 'Route',
                         'AttributeType': 'N',
+                    },
+                    {
+                        'AttributeName': 'SegmentIds',
+                        'AttributeType': 'SS'
                     },
                 ],
                 KeySchema=[
@@ -43,34 +52,91 @@ def _get_table():
                     'ReadCapacityUnits': 5,
                     'WriteCapacityUnits': 5,
                 },
-                TableName=_DDB_TABLE_NAME,
+                TableName=_DDB_ROUTE_TABLE_NAME,
             )
         finally:
-            _table = _get_ddb().Table(_DDB_TABLE_NAME)
-            _table.wait_until_exists()
-    return _table
+            _route_table = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
+            _route_table.wait_until_exists()
+    return _route_table
 
-#TODO: return NONE on non-existing record
+
+def _get_sequence_table():
+    global _sequence_table
+    if not _sequence_table:
+        try:
+            _get_ddb().create_table(
+                AttributeDefinitions=[
+                    {
+                        'AttributeName': 'SegmentId',
+                        'AttributeType': 'S'
+                    },
+                    {
+                        'AttributeName': 'Segment',
+                        'AttributeType': 'BS'
+                    }
+                ],
+                KeySchema=[
+                    {
+                        'AttributeName': 'SegmentId',
+                        'KeyType': 'HASH'
+                    }
+                ],
+                ProvisionedThroughput={
+                    'ReadCapacityUnits': 5,
+                    'WriteCapacityUnits': 5,
+                },
+                TableName=_DDB_SEGMENT_TABLE_NAME,
+            )
+        finally:
+            _sequence_table = _get_ddb().Table(_DDB_SEGMENT_TABLE_NAME)
+            _sequence_table.wait_until_exists()
+    return _sequence_table
+
+
 def get_route_record(user_id, route):
-    response = _get_table().get_item(Key={'UserId': user_id, 'Route': route})
-    # Return a dictionary of the segments and their lengths
-    return dict((k, response[k]) for k in response.keys()
-                if k not in ('UserId', 'Route'))
+    """
+    Get an ordered list of segment ids pertaining to the passed route for the given user.
 
-#TODO: return NONE on non-existing segment
-def get_segment(user_id, route, segment_id):
-    return _get_table().get_item(
-        Key={
-            'UserId': user_id,
-            'Route': route
-        },
-        ProjectionExpression=
-        f'segment_{segment_id}", segment_{segment_id}_length')
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @return: ordered list of segment ids
+    """
+    response = _get_route_table().get_item(Key={'UserId': user_id, 'Route': route}, ConsistentRead=True)
+    if "Item" in response.keys():
+        return response['Item']['SegmentIds']
+    return []
 
-#TODO: shuffle down indexes on delete, eg given segments {0, 1, 2, 3} -> delete 2 -> {0, 1, 2}
+
+def get_route_segments(segment_ids):
+    """
+    Get an ordered list of segments given a list of segment ids
+    @param segment_ids: a list of segment ids
+    @return: ordered list of segments
+    """
+    # make sure table is active
+    _get_ddb().Table(_DDB_SEGMENT_TABLE_NAME).wait_until_exists()
+
+    # batch_get_items doesn't guarantee order. Index segments to a dict first
+    segments = {}
+    unprocessed_keys = copy.deepcopy(segment_ids)
+    while len(unprocessed_keys) > 0:
+        response = _get_ddb().batch_get_item(
+            RequestItems={
+                _DDB_SEGMENT_TABLE_NAME: {
+                    'Keys': [{'SegmentId': {'S': key}} for key in unprocessed_keys],
+                    'ConsistentRead': True
+                }
+            }
+        )
+        if "UnprocessedKeys" in response.keys():
+            unprocessed_keys = copy.deepcopy(response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"])
+        for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
+            segments[item["SegmentId"]] = pickle.loads(item["Segment"])
+    return [segments[segment_id] for segment_id in segment_ids]
+
 def update_route_record(user_id, route, segment_id, nodes, delete=False):
     if delete:
-        _get_table().update_item(Key={
+        _get_route_table().update_item(Key={
             'UserId': user_id,
             'Route': route
         },
@@ -83,13 +149,13 @@ def update_route_record(user_id, route, segment_id, nodes, delete=False):
                 }
             })
     else:
-        _get_table().update_item(Key={
+        _get_route_table().update_item(Key={
             'UserId': user_id,
             'Route': route
         },
             AttributeUpdates={
                 f"segment_{segment_id}": {
-                    'Value': json.dumps(nodes),
+                    'Value': json.dump(nodes),
                     'Action': 'SET'
                 },
                 f"segment_{segment_id}_length": {
