@@ -16,3 +16,5 @@ def shortest_route(start, end):
 def nearest_node(lng, lat):
     """ Get the nearest node, given lng lat coordinates"""
     return Node.objects.raw(f"SELECT * FROM nodes ORDER BY <-> ST_GeometryFromText(\'POINT({lng} {lat})\', {SRID}) LIMIT 1")[0]
+
+

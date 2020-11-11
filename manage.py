@@ -2,6 +2,8 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import coverage
+import django
 
 
 def main():
@@ -15,7 +17,22 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
+    django.setup()
+
+    is_testing = 'test' in sys.argv
+    if is_testing:
+        cov = coverage.coverage(source=['app'], omit=['*/tests/*'])
+        cov.set_option('report:show_missing', True)
+        cov.erase()
+        cov.start()
+    # Add this 5 line above
     execute_from_command_line(sys.argv)
+    # and add this 4 line below
+    if is_testing:
+        cov.stop()
+        cov.save()
+        cov.report()
 
 
 if __name__ == '__main__':

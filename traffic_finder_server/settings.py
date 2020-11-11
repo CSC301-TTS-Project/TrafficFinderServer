@@ -80,6 +80,7 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if 'PROD' in os.environ:
+    #TODO: UPDATE PROD SETTINGS
     # Configured on Elastic Beanstalk EC2 Instances
     DATABASES = {
         # USE RDS; Should be read only.
@@ -93,6 +94,23 @@ if 'PROD' in os.environ:
         }
     }
     DDB_ENDPOINT = None
+elif 'BUILD' in os.environ:
+    #TODO: edit buildspec and config
+    config = configparser.ConfigParser()
+    config.read('traffic_finder_server/config/test.ini')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': config['POSTGRES']['NAME'],
+            'TEST': {
+                'NAME': config['POSTGRES']['NAME']
+            },
+            'HOST': config['POSTGRES']['HOST'],
+            'PORT': config['POSTGRES']['PORT']
+        }
+    }
+    DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
+    DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
 else:
     # Read Local Config
     config = configparser.ConfigParser()
@@ -104,11 +122,15 @@ else:
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': config['POSTGRES']['NAME'],
             'TEST': {
-                'NAME': config['POSTGRES']['TEST_NAME']
+                #since it's readonly anyways, don't need to copy into a new db
+                'NAME': config['POSTGRES']['NAME']
             }
         }
     }
     DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
+    DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
+    DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
+    DDB_SEGMENT_TABLE_NAME = config['DYNAMO_DB']['DDB_SEGMENT_TABLE_NAME']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

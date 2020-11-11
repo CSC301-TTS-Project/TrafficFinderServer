@@ -4,10 +4,10 @@ from .views import *
 
 urlpatterns = [
     path('', hdc_index),
-    path('getRoute', hdc_getRoute),
-    path('insertNode', hdc_insertNode),
+    path('getRoute', get_route),
+    path('insertNode', insert_node),
     path('modifyNode', hdc_modifyNode),
-    path('deleteNode', hdc_deleteNode),
+    path('deleteNode', delete_node),
     path('addNodeToRoute', hdc_addNodeToRoute),
     path('modifyRouteNode', hdc_modifyRouteNode),
     path('deleteRouteNode', hdc_deleteRouteNode),
