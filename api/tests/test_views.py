@@ -1,6 +1,5 @@
 from api.ddb_actions import reset
 from django.test import TestCase, Client
-from django.test.utils import override_settings
 import json
 
 

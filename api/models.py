@@ -32,7 +32,7 @@ class NodeManager(models.Manager):
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT * FROM nodes NATURAL RIGHT JOIN (SELECT node AS node_id FROM pgr_dijkstra(\'SELECT id, "
-                "source, target, length AS cost FROM links\', %s, %s)) AS path",
+                "source, target, length AS cost FROM links\', %s, %s)) AS path",   
                 [start.node_id, end.node_id])
             result_list = []
             for row in cursor.fetchall():
@@ -52,7 +52,7 @@ class Node(models.Model):
         db_table = 'nodes'
 
     def to_json(self):
-        return {'id': self.node_id, 'lat': self.wkb_geometry.y, 'lng': self.wkb_geometry.x }
+        return {'id': self.node_id, 'lat': self.wkb_geometry.y, 'lng': self.wkb_geometry.x}
 
 
 class TravelTime(models.Model):
