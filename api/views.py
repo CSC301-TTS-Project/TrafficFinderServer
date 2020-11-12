@@ -29,7 +29,6 @@ def get_route(request):
         return JsonResponse({"Route": [dump_node_list_json(segment) for segment in route_segments]}, safe=False)
     except KeyError as e:
         log.error(f"Got the following error during get_route {e}")
-        print(e)
         return HttpResponseBadRequest("Malformed Input")
 
 
