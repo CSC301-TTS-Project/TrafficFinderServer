@@ -18,7 +18,7 @@ _sequence_table = None
 def _get_ddb():
     global _ddb
     if not _ddb:
-        _ddb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+        _ddb = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
     return _ddb
 
 

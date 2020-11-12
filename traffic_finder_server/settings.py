@@ -131,7 +131,7 @@ else:
             }
         }
     }
-    DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
+    DDB_ENDPOINT = str(config['DYNAMO_DB']['ENDPOINT'])
     DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
     DEFAULT_ROUTE = int(config['DYNAMO_DB']['DEFAULT_ROUTE'])
     DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
