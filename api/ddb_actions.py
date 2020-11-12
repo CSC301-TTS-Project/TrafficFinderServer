@@ -175,7 +175,7 @@ def update_route_segment(user_id, route, index, nodes):
     _get_segment_table().put_item(
         Item={
             'SegmentId': new_segment_id,
-            'Segment': set([pickle.dumps(node) for node in nodes])
+            'Segment': [pickle.dumps(node) for node in nodes]
         }
     )
 
