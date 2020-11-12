@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django_nose',
     'django.contrib.gis',
-    'api'
+    'api',
+    'rest_framework'
 ]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -50,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -79,9 +80,10 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if 'PROD' in os.environ:
-    #Configured on Elastic Beanstalk EC2 Instances
+    #TODO: UPDATE PROD SETTINGS
+    # Configured on Elastic Beanstalk EC2 Instances
     DATABASES = {
-        #USE RDS; Should be read only.
+        # USE RDS; Should be read only.
         'default': {
             'ENGINE': 'django.db.backends.',
             'NAME': os.environ['RDS_DB_NAME'],
@@ -91,25 +93,45 @@ if 'PROD' in os.environ:
             'PORT': os.environ['RDS_PORT']
         }
     }
-    USE_LOCAL_DDB = False
-    LOCAL_DDB_ENDPOINT = None
+    DDB_ENDPOINT = None
+elif 'BUILD' in os.environ:
+    #TODO: edit buildspec and config
+    config = configparser.ConfigParser()
+    config.read('traffic_finder_server/config/test.ini')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': config['POSTGRES']['NAME'],
+            'TEST': {
+                'NAME': config['POSTGRES']['NAME']
+            },
+            'HOST': config['POSTGRES']['HOST'],
+            'PORT': config['POSTGRES']['PORT']
+        }
+    }
+    DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
+    DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
 else:
-    #Read Local Config
+    # Read Local Config
     config = configparser.ConfigParser()
     config.read('traffic_finder_server/config/local.ini')
     DATABASES = {
         'default': {
-            #DEFAULT TO LOCAL POSTGRES
-            #SETUP YOUR OWN LOCAL DB
+            # DEFAULT TO LOCAL POSTGRES
+            # SETUP YOUR OWN LOCAL DB
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': config['POSTGRES']['NAME'],
             'TEST': {
-                'NAME': config['POSTGRES']['TEST_NAME']
+                #since it's readonly anyways, don't need to copy into a new db
+                'NAME': config['POSTGRES']['NAME']
             }
         }
     }
-    USE_LOCAL_DDB = True
-    LOCAL_DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
+    DDB_ENDPOINT = str(config['DYNAMO_DB']['ENDPOINT'])
+    DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
+    DEFAULT_ROUTE = int(config['DYNAMO_DB']['DEFAULT_ROUTE'])
+    DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
+    DDB_SEGMENT_TABLE_NAME = config['DYNAMO_DB']['DDB_SEGMENT_TABLE_NAME']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

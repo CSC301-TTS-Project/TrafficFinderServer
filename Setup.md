@@ -4,7 +4,7 @@
 
 2. Install setup venv and install python dependencies: python3 -m pip install -r requirements.txt
 
-3. Install and run local DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html
+3. Install and run local DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html (install aws cli and run aws configure)
 
 4. Fill out traffic_finder_server/config/local.ini with relevant fields
 

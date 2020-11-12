@@ -9,7 +9,7 @@ phases:
   build:
     commands:
       - pylint --load-plugins pylint_django traffic_finder_server api
-      - python manage.py test
+      - python manage.py test --keepdb
   post_build:
     commands:
       - echo Build passed on `date`
