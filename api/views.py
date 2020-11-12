@@ -1,9 +1,10 @@
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
+from django.core import serializers
 import json
 from .ddb_actions import get_route_segments, get_route_segment_ids, insert_route_segment, \
     update_route_segment, delete_route_segment
-from .pg_routing_queries import shortest_route, nearest_node
 from django.conf import settings
+from api.models import Node
 import logging
 
 # Set this in config, should be set using auth header later
@@ -14,6 +15,9 @@ log = logging.getLogger(__name__)
 def index(request):
     return HttpResponse("Hello World!")
 
+def dump_node_list_json(node_list):
+    return [node.to_json() for node in node_list]
+
 def get_route(request):
     """ Expect the json field route """
     log.debug("Received [GET] get_route")
@@ -22,10 +26,10 @@ def get_route(request):
         route = int(json_data["route"])
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
-        log.debug(json.dumps(route_segments))
-        return JsonResponse({"Route": route_segments}, safe=False)
+        return JsonResponse({"Route": [dump_node_list_json(segment) for segment in route_segments]}, safe=False)
     except KeyError as e:
         log.error(f"Got the following error during get_route {e}")
+        print(e)
         return HttpResponseBadRequest("Malformed Input")
 
 
@@ -36,30 +40,32 @@ def insert_node(request):
         lat = float(json_data["lat"])
         lng = float(json_data["lng"])
         segment_idx = json_data["index"]
-        new_node = nearest_node(lat, lng)
+        new_node = Node.objects.nearest_node(lat, lng)
+
         if segment_idx == 0:
             insert_route_segment(USER, route, segment_idx, [new_node])
-            return JsonResponse(json.dumps(new_node))
+            return JsonResponse({segment_idx: [new_node.to_json()]})
         else:
             # route to new node
             segment_ids = get_route_segment_ids(USER, route)
-            if not 0 <= segment_idx < len(segment_ids):
-                return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
 
+            if not 0 <= segment_idx < len(segment_ids) + 1:
+                return HttpResponseBadRequest(f"Passed index {segment_idx} out of bounds.")
             prev_node_segment = get_route_segments([segment_ids[segment_idx - 1]])[0]
             prev_node = prev_node_segment[-1]
-            new_segment = shortest_route(prev_node, new_node)
-            ret_json = {segment_idx: new_segment}
+            new_segment = Node.objects.shortest_route(prev_node, new_node)
+            ret_json = {segment_idx: dump_node_list_json(new_segment)}
             if segment_idx + 1 < len(segment_ids):
                 # update successor segment
                 successor_node_segment = get_route_segments([segment_ids[segment_idx + 1]])[0]
                 successor_node = successor_node_segment[-1]
-                new_successor_segment = shortest_route(new_node, successor_node)
+                new_successor_segment = Node.objects.shortest_route(new_node, successor_node)
                 update_route_segment(USER, route, segment_idx + 1, new_successor_segment)
-                ret_json[segment_idx + 1] = new_successor_segment
+                ret_json[segment_idx + 1] = dump_node_list_json(new_successor_segment)
             insert_route_segment(USER, route, segment_idx, new_segment)
             return JsonResponse(ret_json, safe=False)
-    except (KeyError, ValueError):
+    except (KeyError, ValueError) as e:
+        log.error(e)
         return HttpResponseBadRequest("Malformed Input")
 
 
@@ -86,7 +92,7 @@ def delete_node(request):
             successor_node_segment = get_route_segments([segment_ids[segment_idx + 1]])[0]
             successor_node = successor_node_segment[-1]
 
-            new_successor_segment = shortest_route(prev_node, successor_node)
+            new_successor_segment = Node.objects.shortest_route(prev_node, successor_node)
             update_route_segment(USER, route, segment_idx + 1, new_successor_segment)
             ret_json[segment_idx] = new_successor_segment
         elif segment_idx + 1 < len(segment_ids):
@@ -98,7 +104,9 @@ def delete_node(request):
         # otherwise, don't need to send back updates since it was the last node segment that was deleted
         delete_route_segment(USER, route, segment_idx)
         return JsonResponse(ret_json, safe=False)
-    except (KeyError, ValueError):
+    except (KeyError, ValueError) as e:
+        print(e)
+        log.error(e)
         return HttpResponseBadRequest("Malformed Input")
 
 

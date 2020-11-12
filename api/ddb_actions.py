@@ -1,6 +1,6 @@
 from django.conf import settings
 import boto3
-from boto3.dynamodb.types import TypeSerializer
+from boto3.dynamodb.types import TypeDeserializer
 import pickle
 import copy
 import uuid
@@ -13,7 +13,6 @@ _DDB_SEGMENT_TABLE_NAME = settings.DDB_SEGMENT_TABLE_NAME
 _ddb = None
 _route_table = None
 _sequence_table = None
-serializer = TypeSerializer()
 
 
 def _get_ddb():
@@ -141,10 +140,11 @@ def get_route_segments(segment_ids):
                 }
             }
         )
-        if "UnprocessedKeys" in response.keys():
-            unprocessed_keys = copy.deepcopy(response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"])
+        unprocessed_keys.clear()
+        if len(response["UnprocessedKeys"]) > 0:
+            unprocessed_keys.append([x['S'] for x in response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"]])
         for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
-            segments[item["SegmentId"]] = [pickle.loads(node) for node in item["Segment"]]
+            segments[item["SegmentId"]] = [pickle.loads(serialized_node.value) for serialized_node in item["Segment"]]
     return [segments[segment_id] for segment_id in segment_ids]
 
 
@@ -153,7 +153,7 @@ def insert_route_segment(user_id, route, index, nodes):
     _get_segment_table().put_item(
         Item={
             'SegmentId': new_segment_id,
-            'Segment:': set([pickle.dumps(node) for node in nodes])
+            'Segment': [pickle.dumps(node) for node in nodes]
         }
     )
     new_segment_list = get_route_segment_ids(user_id, route)
@@ -164,7 +164,7 @@ def insert_route_segment(user_id, route, index, nodes):
             'Route': route
         },
         AttributeUpdates={
-            'SegmentIds': new_segment_list
+            'SegmentIds': {'Value': new_segment_list}
         }
     )
 
@@ -175,7 +175,7 @@ def update_route_segment(user_id, route, index, nodes):
     _get_segment_table().put_item(
         Item={
             'SegmentId': new_segment_id,
-            'Segment:': set([pickle.dumps(node) for node in nodes])
+            'Segment': set([pickle.dumps(node) for node in nodes])
         }
     )
 
@@ -188,7 +188,7 @@ def update_route_segment(user_id, route, index, nodes):
             'Route': route
         },
         AttributeUpdates={
-            'SegmentIds': new_segment_list
+            'SegmentIds': {'Value': new_segment_list}
         }
     )
 
@@ -207,6 +207,16 @@ def delete_route_segment(user_id, route, index):
     _get_segment_table().delete_item(
         Key={
             'SegmentId': segment_id_to_remove
+        }
+    )
+
+    _get_route_table().update_item(
+        Key={
+            'UserId': user_id,
+            'Route': route
+        },
+        AttributeUpdates={
+            'SegmentIds': {'Value': segment_list}
         }
     )
 
