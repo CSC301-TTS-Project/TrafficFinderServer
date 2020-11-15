@@ -12,7 +12,7 @@ class ViewTest(TestCase):
         client = Client()
         response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['Route'], [])
+        self.assertEqual(json.loads(response.content), [])
 
     def test_insert_node(self):
         client = Client()
@@ -33,15 +33,28 @@ class ViewTest(TestCase):
         self.assertEqual(response_2.status_code, 200)
 
         # Should correspond to this segment https://tinyurl.com/y5ymsllm
-        self.assertEqual(json.loads(response_2.content)['1'], [{"id": 1033, "lat": 43.75079, "lng": -79.63473},
-                                                               {"id": 1034, "lat": 43.75126, "lng": -79.6347}])
+        self.assertEqual(json.loads(response_2.content)['1'], {
+            'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
+            'end_node': {'id': 30326192, 'lat': 43.75126, 'lng': -79.6347},
+            'coordinates': [{'lat': -79.63473, 'lng': 43.75079},
+                            {'lat': -79.6347, 'lng': 43.75094},
+                            {'lat': -79.6347, 'lng': 43.75126}]
+        })
 
         response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(json.loads(response.content)['Route'], [[{'id': 30326191, 'lat': 43.75079, 'lng': -79.63473}],
-                                                                 [{'id': 1033, 'lat': 43.75079, 'lng': -79.63473},
-                                                                  {'id': 1034, 'lat': 43.75126, 'lng': -79.6347}]])
+        self.assertEqual(json.loads(response.content), [{
+            'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
+            'end_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
+            'coordinates': []
+        }, {
+            'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
+            'end_node': {'id': 30326192, 'lat': 43.75126, 'lng': -79.6347},
+            'coordinates': [{'lat': -79.63473, 'lng': 43.75079},
+                            {'lat': -79.6347, 'lng': 43.75094},
+                            {'lat': -79.6347, 'lng': 43.75126}]
+        }])
 
     def test_delete_node(self):
         client = Client()
@@ -73,4 +86,7 @@ class ViewTest(TestCase):
         response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)['Route'], [[{'id': 30326191, 'lat': 43.75079, 'lng': -79.63473}]])
+        self.assertEqual(json.loads(response.content), [{
+            'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
+            'end_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473}, 'coordinates': []
+        }])

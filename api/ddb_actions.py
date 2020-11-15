@@ -1,10 +1,8 @@
 from django.conf import settings
 import boto3
-from boto3.dynamodb.types import TypeDeserializer
 import pickle
 import copy
 import uuid
-import botocore.exceptions
 
 # Change with config later
 _DDB_ROUTE_TABLE_NAME = settings.DDB_ROUTE_TABLE_NAME
@@ -123,7 +121,7 @@ def get_route_segments(segment_ids):
     """
     Get an ordered list of segments given a list of segment ids
     @param segment_ids: a list of segment ids
-    @return: ordered list of segments (2D List of nodes)
+    @return: ordered list of segments (each segment starts and ends with nodes that define the endpoints of the segment)
     """
     # make sure table is active
     _get_segment_table()
@@ -144,16 +142,16 @@ def get_route_segments(segment_ids):
         if len(response["UnprocessedKeys"]) > 0:
             unprocessed_keys.append([x['S'] for x in response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"]])
         for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
-            segments[item["SegmentId"]] = [pickle.loads(serialized_node.value) for serialized_node in item["Segment"]]
+            segments[item["SegmentId"]] = pickle.loads(item["Segment"].value)
     return [segments[segment_id] for segment_id in segment_ids]
 
 
-def insert_route_segment(user_id, route, index, nodes):
+def insert_route_segment(user_id, route, index, segment):
     new_segment_id = str(uuid.uuid4())
     _get_segment_table().put_item(
         Item={
             'SegmentId': new_segment_id,
-            'Segment': [pickle.dumps(node) for node in nodes]
+            'Segment': pickle.dumps(segment)
         }
     )
     new_segment_list = get_route_segment_ids(user_id, route)
@@ -169,13 +167,13 @@ def insert_route_segment(user_id, route, index, nodes):
     )
 
 
-def update_route_segment(user_id, route, index, nodes):
+def update_route_segment(user_id, route, index, segment):
     new_segment_id = str(uuid.uuid4())
 
     _get_segment_table().put_item(
         Item={
             'SegmentId': new_segment_id,
-            'Segment': [pickle.dumps(node) for node in nodes]
+            'Segment': pickle.dumps(segment)
         }
     )
 
