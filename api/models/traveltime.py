@@ -2,10 +2,12 @@ from django.contrib.gis.db import models
 
 class TravelTime(models.Model):
     """
-        Hacked together DB table based on travel_time_201809.csv data provided by Raphael
+        Mock DB table based on travel_time_201809.csv data provided by Raphael.
 
-        You will need to change these fields based on the actual HERE datasets and preform
-        the data aggregation queries at
+        Will need to change these fields based on the actual HERE datasets and preform
+        the data aggregation queries separately.
+
+        See https://github.com/CityofToronto/bdit_data-sources/tree/master/here
     """
     link_dir = models.CharField(primary_key=True, max_length=50)
     tx = models.DateTimeField()

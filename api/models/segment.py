@@ -26,8 +26,13 @@ class Segment:
 
         self.link_dirs = [link.link_dir for link in links]
         # [{'lat': <val>, 'lng': <val>}, ...]
-        self.coordinates = [dict(zip(["lat", "lng"], tup)) for tup in
-                            list(itertools.chain.from_iterable(link.wkb_geometry.array for link in links))]
+        lng_lat_tuples = list(itertools.chain.from_iterable(link.wkb_geometry.tuple for link in links))
+        seen_tuples = set()
+        self.coordinates = []
+        for tup in lng_lat_tuples:
+            if tup not in seen_tuples:
+                self.coordinates.append(tup)
+            seen_tuples.add(tup)
 
     def to_json(self):
         return {
