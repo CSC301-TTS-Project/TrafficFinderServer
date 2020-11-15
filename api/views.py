@@ -1,10 +1,11 @@
+import itertools
+
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
-from django.core import serializers
 import json
 from .ddb_actions import get_route_segments, get_route_segment_ids, insert_route_segment, \
     update_route_segment, delete_route_segment
 from django.conf import settings
-from api.models import Node, Segment
+from api.models import Node, Segment, TravelTime
 import logging
 
 # Set this in config, should be set using auth header later
@@ -12,8 +13,10 @@ USER = settings.DEFAULT_DDB_USER_ID
 
 log = logging.getLogger(__name__)
 
+
 def index(request):
     return HttpResponse("Hello World!")
+
 
 def get_route(request):
     """ Expect the json field route """
@@ -110,6 +113,45 @@ def delete_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+def get_traffic_data(request):
+    """
+    Get traffic data in csv format.
+
+    Will later support optional fields.
+
+    Expects a json body with the following parameters:
+        route: the corresponding route you are fetching data for
+        date_range: the date range to query
+        days_of_week: the days of the week to query in integer format,
+            i.e. [0, 2, 4] corresponds to [Sunday, Tuesday, Thursday]
+        hour_range: the hour range to query
+
+    @return: csv body with hourly aggregated traffic data for the time window
+    """
+    log.debug("Received [GET] get_route")
+    try:
+        json_data = json.loads(request.body)
+        route = int(json_data["route"])
+        date_range = json_data["date_range"]
+        days_of_week = [int(day) for day in json_data["days_of_week"]]
+        hour_range = [int(hr) for hr in json_data["hour_range"]]
+        route_segment_ids = get_route_segment_ids(USER, route)
+        route_segments = get_route_segments(route_segment_ids)
+
+        route_here_data = TravelTime.get_data_for_route(
+            list(itertools.chain.from_iterable([seg.link_dirs for seg in route_segments])), date_range, days_of_week,
+            hour_range)
+
+        response_csv = ",".join(route_here_data[0].keys())
+        response_csv += '\n'
+        for record in route_here_data:
+            response_csv += ",".join([str(val) for val in record.values()])
+            response_csv += '\n'
+        print(response_csv)
+        return HttpResponse(response_csv)
+    except KeyError as e:
+        log.error(f"Got the following error during get_route {e}")
+        return HttpResponseBadRequest("Malformed Input")
 
 
 # HARD CODED VARIANTS BELOW
