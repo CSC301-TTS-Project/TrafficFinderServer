@@ -175,8 +175,8 @@ def hdc_index(request):
 
 def hdc_getRoute(request):
     """ Expect the json fields route. """
-    json_data = json.loads(request.body)
     try:
+        json_data = json.loads(request.body)
         route = json_data["route"]
         return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
     except KeyError:
@@ -184,8 +184,8 @@ def hdc_getRoute(request):
 
 
 def hdc_insertNode(request):
-    json_data = json.loads(request.body)
     try:
+        json_data = json.loads(request.body)
         route = json_data["route"]
         lat = json_data["lat"]
         lng = json_data["lng"]
@@ -200,8 +200,8 @@ def hdc_modifyNode(request):
 
 
 def hdc_deleteNode(request):
-    json_data = json.loads(request.body)
     try:
+        json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = json_data["index"]
         return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
@@ -210,8 +210,8 @@ def hdc_deleteNode(request):
 
 
 def hdc_addNodeToRoute(request):
-    json_data = json.loads(request.body)
     try:
+        json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = json_data["index"]
         lat = json_data["lat"]
