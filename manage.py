@@ -20,6 +20,10 @@ def main():
 
     django.setup()
 
+    # Override default port since it's taken up by dynamo
+    from django.core.management.commands.runserver import Command as run_server
+    run_server.default_port = "8080"
+
     is_testing = 'test' in sys.argv
     if is_testing:
         cov = coverage.coverage(source=['api'], omit=['*/tests/*'])
