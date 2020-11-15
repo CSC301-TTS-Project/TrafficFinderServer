@@ -34,7 +34,7 @@ class TravelTime(models.Model):
     @staticmethod
     def get_data_for_route(link_dirs, date_range, days_of_week, hour_range):
         """
-        #TODO: min/max speed, percentile calculations, street names
+        #TODO: min/max speed, street names
 
         Return hourly aggregated data for the passed links.
 
