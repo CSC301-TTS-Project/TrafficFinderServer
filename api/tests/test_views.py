@@ -114,3 +114,7 @@ class ViewTest(TestCase):
         }))
 
         assert response.status_code == 200
+        assert response._headers['content-type'] == ('Content-Type', 'text/csv')
+        assert response.content == b"hour,link_dir,length,hourly_mean_tt,link_obs\n" \
+                                b"08:00:00,29492876F,52,41.0,1\n" \
+                                b"10:00:00,29492876F,52,11.5,1\n"

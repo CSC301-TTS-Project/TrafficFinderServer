@@ -128,7 +128,7 @@ def get_traffic_data(request):
 
     @return: csv body with hourly aggregated traffic data for the time window
     """
-    log.debug("Received [GET] get_route")
+    log.debug("Received [GET] getTrafficData")
     try:
         json_data = json.loads(request.body)
         route = int(json_data["route"])
@@ -147,10 +147,9 @@ def get_traffic_data(request):
         for record in route_here_data:
             response_csv += ",".join([str(val) for val in record.values()])
             response_csv += '\n'
-        print(response_csv)
-        return HttpResponse(response_csv)
+        return HttpResponse(response_csv, content_type='text/csv')
     except KeyError as e:
-        log.error(f"Got the following error during get_route {e}")
+        log.error(f"Got the following error during getTrafficData {e}")
         return HttpResponseBadRequest("Malformed Input")
 
 
