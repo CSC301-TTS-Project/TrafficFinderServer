@@ -54,6 +54,16 @@ class TravelTime(models.Model):
             .filter(tx__iso_week_day__in=days_of_week) \
             .extra({"hour": "date_trunc('hour', tx)::time"}) \
             .values('link_dir', 'hour', 'length').annotate(hourly_mean_tt=models.Avg('mean'),
-                                                           link_obs=models.Count(1))
+                                                           link_obs=models.Count(1),
+                                                           pct_85=models.Aggregate(
+                                                               models.F("mean"),
+                                                               function="percentile_cont",
+                                                               template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)",
+                                                           ),
+                                                           pct_95=models.Aggregate(
+                                                               models.F("mean"),
+                                                               function="percentile_cont",
+                                                               template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)",
+                                                           ))
 
         return link_hourly

@@ -100,8 +100,8 @@ class ViewTest(TestCase):
 
         response_2 = client.post('/api/insertNode', json.dumps({
             'route': 0,
-            'lat': 43.75126,
-            'lng': -79.6347,
+            'lat': 43.744883,
+            'lng': -79.610741,
             'index': 1
         }), content_type="application/json")
         self.assertEqual(response_2.status_code, 200)
@@ -115,6 +115,4 @@ class ViewTest(TestCase):
 
         assert response.status_code == 200
         assert response._headers['content-type'] == ('Content-Type', 'text/csv')
-        assert response.content == b"hour,link_dir,length,hourly_mean_tt,link_obs\n" \
-                                b"08:00:00,29492876F,52,41.0,1\n" \
-                                b"10:00:00,29492876F,52,11.5,1\n"
+        assert response.content.startswith(b'hour,link_dir,length,hourly_mean_tt,link_obs,pct_85,pct_95\n')
