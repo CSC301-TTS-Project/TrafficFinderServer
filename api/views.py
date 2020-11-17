@@ -77,6 +77,14 @@ def insert_node(request):
 
 
 def modify_node(request):
+    try:
+        json_data = json.loads(request.body)
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+
+        segment_ids = get_route_segment_ids(USER, route)
+        if not 0 <= segment_idx < len(segment_ids):
+            return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
     return HttpResponse()
 
 
