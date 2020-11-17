@@ -80,13 +80,42 @@ def modify_node(request):
     try:
         json_data = json.loads(request.body)
         route = json_data["route"]
-        segment_idx = json_data["index"]
-        lat = json_data["lat"]
-        long = json_data["long"]
-
+        segment_idx = int(json_data["index"])
+        lat = float(json_data["lat"])
+        lng = float(json_data["lng"])
         segment_ids = get_route_segment_ids(USER, route)
         if not 0 <= segment_idx < len(segment_ids):
             return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
+        new_node = Node.objects.nearest_node(lat, lng)
+        ret_json = {}
+        if segment_idx - 1 >= 0 and segment_idx + 1 < len(segment_ids):
+            # deleting an intermediate segment
+            prev_node_segment = get_route_segments(
+                [segment_ids[segment_idx - 1]])[0]
+            prev_node = prev_node_segment.end_node
+
+            successor_node_segment = get_route_segments(
+                [segment_ids[segment_idx + 1]])[0]
+            successor_node = successor_node_segment.end_node
+
+            new_successor_segment = Segment.route_segment_between_nodes(
+                prev_node, successor_node)
+            update_route_segment(
+                USER, route, segment_idx + 1, new_successor_segment)
+            ret_json[segment_idx] = new_successor_segment.to_json()
+        elif segment_idx + 1 < len(segment_ids):
+            # deleting first node
+            successor_node_segment = get_route_segments(
+                [segment_ids[segment_idx + 1]])[0]
+            successor_node = successor_node_segment.end_node
+            new_starting_segment = Segment.singular(successor_node)
+            update_route_segment(USER, route, segment_idx,
+                                 new_starting_segment)
+            ret_json[segment_idx] = new_starting_segment.to_json()
+        # otherwise, don't need to send back updates since it was the last node segment that was deleted
+        delete_route_segment(USER, route, segment_idx)
+        return JsonResponse(ret_json, safe=False)
+
     except (KeyError, ValueError) as e:
         print(e)
         log.error(e)
