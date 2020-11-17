@@ -81,11 +81,16 @@ def modify_node(request):
         json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = json_data["index"]
+        lat = json_data["lat"]
+        long = json_data["long"]
 
         segment_ids = get_route_segment_ids(USER, route)
         if not 0 <= segment_idx < len(segment_ids):
             return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
-    return HttpResponse()
+    except (KeyError, ValueError) as e:
+        print(e)
+        log.error(e)
+        return HttpResponseBadRequest("Malformed Input")
 
 
 def delete_node(request):
