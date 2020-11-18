@@ -118,3 +118,38 @@ class ViewTest(TestCase):
         assert response.content == b"hour,link_dir,length,hourly_mean_tt,link_obs\n" \
                                 b"08:00:00,29492876F,52,41.0,1\n" \
                                 b"10:00:00,29492876F,52,11.5,1\n"
+
+    def test_modify_route(self):
+        client = Client()
+        response_1 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75079,
+            'lng': -79.63473,
+            'index': 0
+        }), content_type="application/json")
+        self.assertEqual(response_1.status_code, 200)
+
+        response_2 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75126,
+            'lng': -79.6347,
+            'index': 1
+        }), content_type="application/json")
+        self.assertEqual(response_2.status_code, 200)
+
+        response_3 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75126,
+            'lng': -79.6347,
+            'index': 2
+        }), content_type="application/json")
+        self.assertEqual(response_2.status_code, 200)
+
+        response_4 = client.patch('/api/modifyNode', json.dumps({
+            'route': 0,
+            'index': 1,
+            'lat': 43.75126,
+            'lng': -79.6347,
+        }), content_type="application/json")
+
+        self.assertEqual(response_3.status_code, 200)
