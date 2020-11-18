@@ -116,5 +116,6 @@ class ViewTest(TestCase):
 
         assert response.status_code == 200
         assert response._headers['content-type'] == ('Content-Type', 'text/csv')
+        print(response.content)
         assert response.content.startswith(
-            b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,full_link_obs\n')
+            b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed,full_link_obs\n')

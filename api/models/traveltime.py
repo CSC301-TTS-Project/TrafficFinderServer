@@ -76,7 +76,9 @@ class TravelTime(models.Model):
                                                         template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
                 .annotate(pct_95_speed=models.Aggregate(models.F("mean"),
                                                         function="percentile_cont",
-                                                        template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)"))
+                                                        template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)")) \
+                .annotate(min_speed=models.Min('mean')) \
+                .annotate(max_speed=models.Max('mean'))
             hourly = hourly.annotate(
                 full_link_obs=models.Value(((int((end_time - start_time).seconds) // 60) / 5) * len(link_dirs),
                                            models.IntegerField()))
