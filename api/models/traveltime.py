@@ -41,6 +41,8 @@ class TravelTime(models.Model):
         @param date_range: String tuple corresponding to the date range e.g. ("2018-09-01", "2018-09-02")
         @param days_of_week: Tuple representing days of week to include in aggregation, e.g. [0, 1, 2] corresponds to sunday, monday, tuesday
         @param hour_range: An hourly range, e.g. [7, 13] for 7AM to 1PM
+
+        @precondition: link_dirs has at least one link.
         """
 
         start_time = datetime.strptime(f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
@@ -65,7 +67,6 @@ class TravelTime(models.Model):
                 f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
                 link_dirs)
             total_length = cursor.fetchone()[0]
-            print(total_length)
             hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
                 .annotate(mean_speed=models.Avg('mean')) \
                 .annotate(std_dev_speed=models.StdDev('mean')) \
