@@ -8,7 +8,7 @@ class NodeManager(models.Manager):
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT * FROM nodes ORDER BY wkb_geometry <-> ST_GeometryFromText(\'POINT(%s %s)\', %s) LIMIT 1",
-                [lat, lng, SRID])
+                [lat, lng, 4326])
             row = cursor.fetchone()
             return self.model(ogc_fid=row[0], node_id=row[1], wkb_geometry=row[2])
 

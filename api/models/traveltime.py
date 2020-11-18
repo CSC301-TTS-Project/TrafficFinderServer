@@ -1,7 +1,6 @@
 from django.db import models
 from datetime import datetime
 from django.db import connection
-from .node import SRID
 
 
 class TravelTime(models.Model):
@@ -62,10 +61,11 @@ class TravelTime(models.Model):
             cursor.execute(
                 f"SELECT SUM(length) "
                 f"FROM "
-                f"(SELECT DISTINCT links.link_dir, ST_Length(ST_Transform(links.wkb_geometry, {SRID})) "
+                f"(SELECT DISTINCT links.link_dir, ST_Length(ST_Transform(links.wkb_geometry, 2952)) "
                 f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
                 link_dirs)
             total_length = cursor.fetchone()[0]
+            print(total_length)
             hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
                 .annotate(mean_speed=models.Avg('mean')) \
                 .annotate(std_dev_speed=models.StdDev('mean')) \
