@@ -88,32 +88,24 @@ def modify_node(request):
             return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
         new_node = Node.objects.nearest_node(lat, lng)
         ret_json = {}
-        if segment_idx - 1 >= 0 and segment_idx + 1 < len(segment_ids):
-            # deleting an intermediate segment
-            prev_node_segment = get_route_segments(
-                [segment_ids[segment_idx - 1]])[0]
-            prev_node = prev_node_segment.end_node
+        # modifying an intermediate segment
+        prev_node_segment = get_route_segments(
+            [segment_ids[(segment_idx - 1) % len(segment_ids)]])[0]
+        prev_node = prev_node_segment.end_node
 
-            successor_node_segment = get_route_segments(
-                [segment_ids[segment_idx + 1]])[0]
-            successor_node = successor_node_segment.end_node
+        successor_node_segment = get_route_segments(
+            [segment_ids[(segment_idx + 1) % len(segment_ids)]])[0]
+        successor_node = successor_node_segment.end_node
 
-            new_successor_segment = Segment.route_segment_between_nodes(
-                prev_node, successor_node)
-            update_route_segment(
-                USER, route, segment_idx + 1, new_successor_segment)
-            ret_json[segment_idx] = new_successor_segment.to_json()
-        elif segment_idx + 1 < len(segment_ids):
-            # deleting first node
-            successor_node_segment = get_route_segments(
-                [segment_ids[segment_idx + 1]])[0]
-            successor_node = successor_node_segment.end_node
-            new_starting_segment = Segment.singular(successor_node)
-            update_route_segment(USER, route, segment_idx,
-                                 new_starting_segment)
-            ret_json[segment_idx] = new_starting_segment.to_json()
-        # otherwise, don't need to send back updates since it was the last node segment that was deleted
-        delete_route_segment(USER, route, segment_idx)
+        new_previous_segment = Segment.route_segment_between_nodes(
+            prev_node, new_node)
+        update_route_segment(
+            USER, route, segment_idx - 1, new_previous_segment)
+        new_successor_segment = Segment.route_segment_between_nodes(
+            new_node, successor_node)
+        update_route_segment(
+            USER, route, segment_idx + 1, new_successor_segment)
+        # ret_json[segment_idx] = new_successor_segment.to_json()
         return JsonResponse(ret_json, safe=False)
 
     except (KeyError, ValueError) as e:
