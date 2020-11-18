@@ -88,24 +88,33 @@ def modify_node(request):
             return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
         new_node = Node.objects.nearest_node(lat, lng)
         ret_json = {}
-        # modifying an intermediate segment
-        prev_node_segment = get_route_segments(
-            [segment_ids[(segment_idx - 1) % len(segment_ids)]])[0]
-        prev_node = prev_node_segment.end_node
+        if segment_idx - 1 >= 0:
+            # There is a prev segment. Route from prev node to new node
+            prev_node_segment = get_route_segments(
+                [segment_ids[segment_idx - 1]])[0]
+            prev_node = prev_node_segment.end_node
+            modified_segment = Segment.route_segment_between_nodes(
+                prev_node, new_node)
+            update_route_segment(
+                USER, route, segment_idx, modified_segment)
+        else:
+            # This is the first node.
+            modified_segment = Segment.singular(new_node)
+            update_route_segment(USER, route, segment_idx,
+                                 modified_segment)
+        ret_json[segment_idx] = modified_segment.to_json()
 
-        successor_node_segment = get_route_segments(
-            [segment_ids[(segment_idx + 1) % len(segment_ids)]])[0]
-        successor_node = successor_node_segment.end_node
+        if segment_idx + 1 < len(segment_ids):
+            # There is a next segment. Route from new node to next node.
+            successor_node_segment = get_route_segments(
+                [segment_ids[segment_idx + 1]])[0]
+            successor_node = successor_node_segment.end_node
+            new_successor_segment = Segment.route_segment_between_nodes(new_node, successor_node)
+            update_route_segment(USER, route, segment_idx,
+                                 new_successor_segment)
+            ret_json[segment_idx + 1] = new_successor_segment.to_json()
 
-        new_previous_segment = Segment.route_segment_between_nodes(
-            prev_node, new_node)
-        update_route_segment(
-            USER, route, segment_idx - 1, new_previous_segment)
-        new_successor_segment = Segment.route_segment_between_nodes(
-            new_node, successor_node)
-        update_route_segment(
-            USER, route, segment_idx + 1, new_successor_segment)
-        # ret_json[segment_idx] = new_successor_segment.to_json()
+        # return any edits.
         return JsonResponse(ret_json, safe=False)
 
     except (KeyError, ValueError) as e:
@@ -270,7 +279,7 @@ def hdc_modifyRouteNode(request):
             segment_idx, int) and isinstance(route, int)
         return JsonResponse(json.dumps([{"index": 1, "id": 123, "lat": 43.651072, "lng": -79.347016},
                                         {"index": 2, "id": 12,
-                                            "lat": 43.651070, "lng": -79.347015},
+                                         "lat": 43.651070, "lng": -79.347015},
                                         {"index": 3, "id": 17, "lat": lat, "lng": lng}]), safe=False)
     except (KeyError, AssertionError):
         return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index, lat, lng")
