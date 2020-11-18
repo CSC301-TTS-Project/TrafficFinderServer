@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 from django.db import connection
 
-SRID = 4326  # WGS84, GPS Coordinates etc
+SRID = 4326  # WGS84, GPS Coordinates etc, probably migrate to https://epsg.io/2946 down the line, but its fine for now.
 
 class NodeManager(models.Manager):
     def nearest_node(self, lng, lat):

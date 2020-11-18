@@ -97,7 +97,6 @@ class ViewTest(TestCase):
             'index': 0
         }), content_type="application/json")
         self.assertEqual(response_1.status_code, 200)
-
         response_2 = client.post('/api/insertNode', json.dumps({
             'route': 0,
             'lat': 43.744883,
@@ -115,4 +114,4 @@ class ViewTest(TestCase):
 
         assert response.status_code == 200
         assert response._headers['content-type'] == ('Content-Type', 'text/csv')
-        assert response.content.startswith(b'hour,link_dir,length,hourly_mean_tt,link_obs,pct_85,pct_95\n')
+        assert response.content.startswith(b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,full_link_obs\n')
