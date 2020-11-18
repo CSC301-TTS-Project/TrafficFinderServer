@@ -42,6 +42,7 @@ class ViewTest(TestCase):
         response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
 
+        # Corresponds to https://jsfiddle.net/176tzbq8/2/
         self.assertEqual(json.loads(response.content), [{
             'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
             'end_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473}, 'coordinates': []
@@ -87,7 +88,6 @@ class ViewTest(TestCase):
         }])
 
     def test_get_traffic_data(self):
-        # TODO: Verify return vals after creating a route
         client = Client()
 
         response_1 = client.post('/api/insertNode', json.dumps({
@@ -112,6 +112,9 @@ class ViewTest(TestCase):
             'hour_range': [7, 13]
         }))
 
+        # Corresponds to traffic data for route https://jsfiddle.net/dh4w9ez2/12/
+
         assert response.status_code == 200
         assert response._headers['content-type'] == ('Content-Type', 'text/csv')
-        assert response.content.startswith(b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,full_link_obs\n')
+        assert response.content.startswith(
+            b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,full_link_obs\n')
