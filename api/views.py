@@ -88,7 +88,6 @@ def modify_node(request):
             return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
         new_node = Node.objects.nearest_node(lat, lng)
         ret_json = {}
-        # modifying an intermediate segment
         prev_node_segment = get_route_segments(
             [segment_ids[(segment_idx - 1) % len(segment_ids)]])[0]
         prev_node = prev_node_segment.end_node
@@ -105,7 +104,8 @@ def modify_node(request):
             new_node, successor_node)
         update_route_segment(
             USER, route, segment_idx + 1, new_successor_segment)
-        # ret_json[segment_idx] = new_successor_segment.to_json()
+        ret_json["prev_segment"] = new_previous_segment.to_json()
+        ret_json["succ_segment"] = new_successor_segment.to_json()
         return JsonResponse(ret_json, safe=False)
 
     except (KeyError, ValueError) as e:
