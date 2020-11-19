@@ -1,14 +1,22 @@
 version: 0.2
 
+env:
+  variables:
+    CLOUD_BUILD: "True"
 phases:
   install:
     runtime-versions:
       python: 3.x
     commands:
+      - add-apt-repository ppa:ubuntugis/ppa
+      - apt-get update
+      - yes | apt-get install binutils libproj-dev gdal-bin
       - pip install -r requirements.txt
   build:
     commands:
-      - python manage.py test --keepdb
+      - python manage.py makemigrations
+      - python manage.py migrate
+      - python manage.py test --keepdb --nologcapture
   post_build:
     commands:
       - echo Build completed on `date`

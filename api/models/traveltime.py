@@ -45,8 +45,10 @@ class TravelTime(models.Model):
         @precondition: link_dirs has at least one link.
         """
 
-        start_time = datetime.strptime(f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
-        end_time = datetime.strptime(f'{date_range[1]} {hour_range[1]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
+        start_time = datetime.strptime(
+            f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
+        end_time = datetime.strptime(
+            f'{date_range[1]} {hour_range[1]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
 
         hourly = TravelTime.objects \
             .filter(link_dir__in=link_dirs) \
@@ -57,7 +59,8 @@ class TravelTime(models.Model):
             .values('hour') \
             .annotate(link_obs=models.Count(1))
 
-        # For whatever reason, the values length values in our DB aren't correct. Recalculate them and related values.
+        # For whatever reason, the values length values in our DB aren't
+        # correct. Recalculate them and related values.
         with connection.cursor() as cursor:
             qs = ','.join('%s' for _ in range(len(link_dirs)))
             cursor.execute(

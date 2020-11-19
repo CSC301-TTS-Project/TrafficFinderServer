@@ -13,7 +13,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TravelTime',
             fields=[
-                ('link_dir', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('link_dir', models.CharField(
+                    max_length=50, primary_key=True, serialize=False)),
                 ('tx', models.DateTimeField()),
                 ('length', models.FloatField(blank=True, null=True)),
                 ('mean', models.FloatField(blank=True, null=True)),

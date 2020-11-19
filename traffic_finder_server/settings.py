@@ -18,7 +18,6 @@ from django.core.management.utils import get_random_secret_key
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -39,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'corsheaders',
     'django_nose',
     'django.contrib.gis',
     'api',
@@ -52,6 +52,8 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -79,38 +81,39 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-if 'PROD' in os.environ:
-    #TODO: UPDATE PROD SETTINGS
-    # Configured on Elastic Beanstalk EC2 Instances
-    DATABASES = {
-        # USE RDS; Should be read only.
-        'default': {
-            'ENGINE': 'django.db.backends.',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT']
-        }
-    }
-    DDB_ENDPOINT = None
-elif 'BUILD' in os.environ:
-    #TODO: edit buildspec and config
-    config = configparser.ConfigParser()
-    config.read('traffic_finder_server/config/test.ini')
+if 'CLOUD_BUILD' in os.environ:
+    # environment variables loaded in from aws secrets manager
+    from .secrets import get_secrets_dict
+    secrets = get_secrets_dict()
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': config['POSTGRES']['NAME'],
+            'NAME': secrets['RDS_TRAFFIC_FINDER_DB'],
             'TEST': {
-                'NAME': config['POSTGRES']['NAME']
+                # since it's readonly anyways, don't need to copy into a new db
+                'NAME': secrets['RDS_TRAFFIC_FINDER_DB']
             },
-            'HOST': config['POSTGRES']['HOST'],
-            'PORT': config['POSTGRES']['PORT']
+            'USER': secrets['RDS_USERNAME'],
+            'PASSWORD': secrets['RDS_PASSWORD'],
+            'HOST': secrets['RDS_HOST'],
+            'PORT': secrets['RDS_PORT']
         }
     }
-    DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
-    DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
+    DDB_ENDPOINT = None
+
+    # Hardcoded for now
+    DEFAULT_DDB_USER_ID = "USER"
+    DEFAULT_ROUTE = 0
+
+    if "PROD" in os.environ:
+        DDB_ROUTE_TABLE_NAME = secrets["DDB_ROUTE_TABLE_NAME"]
+        DDB_SEGMENT_TABLE_NAME = secrets["DDB_SEGMENT_TABLE_NAME"]
+    else:
+        DDB_ROUTE_TABLE_NAME = secrets["DDB_TEST_ROUTE_TABLE_NAME"]
+        DDB_SEGMENT_TABLE_NAME = secrets["DDB_TEST_SEGMENT_TABLE_NAME"]
+
+    HERE_PUBLIC_KEY = secrets['HERE_PUBLIC_KEY']
+    MAPBOX_PUBLIC_KEY = secrets['HERE_PUBLIC_KEY']
 else:
     # Read Local Config
     config = configparser.ConfigParser()
@@ -122,7 +125,7 @@ else:
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': config['POSTGRES']['NAME'],
             'TEST': {
-                #since it's readonly anyways, don't need to copy into a new db
+                # since it's readonly anyways, don't need to copy into a new db
                 'NAME': config['POSTGRES']['NAME']
             }
         }
@@ -132,6 +135,9 @@ else:
     DEFAULT_ROUTE = int(config['DYNAMO_DB']['DEFAULT_ROUTE'])
     DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
     DDB_SEGMENT_TABLE_NAME = config['DYNAMO_DB']['DDB_SEGMENT_TABLE_NAME']
+
+    HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
+    MAPBOX_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -151,7 +157,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -162,3 +167,5 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = False
+
+CORS_ORIGIN_ALLOW_ALL = True

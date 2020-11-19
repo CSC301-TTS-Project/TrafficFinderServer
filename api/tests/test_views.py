@@ -1,6 +1,7 @@
 from api.ddb_actions import reset
 from django.test import TestCase, Client
 import json
+from django.conf import settings
 
 
 class ViewTest(TestCase):
@@ -115,13 +116,25 @@ class ViewTest(TestCase):
             'hour_range': [7, 13]
         }))
 
-        # Corresponds to traffic data for route https://jsfiddle.net/dh4w9ez2/12/
+        # Corresponds to traffic data for route
+        # https://jsfiddle.net/dh4w9ez2/12/
 
         assert response.status_code == 200
-        assert response._headers['content-type'] == ('Content-Type', 'text/csv')
+        assert response._headers['content-type'] == (
+            'Content-Type', 'text/csv')
         print(response.content)
         assert response.content.startswith(
             b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed,full_link_obs\n')
+
+    def test_get_api_keys(self):
+        client = Client()
+
+        response = client.post('/api/getKeys')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {
+            'HERE_PUBLIC_KEY': settings.HERE_PUBLIC_KEY,
+            'MAPBOX_PUBLIC_KEY': settings.MAPBOX_PUBLIC_KEY
+        })
 
     def test_modify_route(self):
         client = Client()

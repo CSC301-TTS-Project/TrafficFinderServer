@@ -21,12 +21,15 @@ class Segment:
 
         If the segment consists of only one node,
         """
-        self.start_node = Node.objects.get(node_id=links[0].source) if start is None else start
-        self.end_node = Node.objects.get(node_id=links[-1].target) if end is None else start
+        self.start_node = Node.objects.get(
+            node_id=links[0].source) if start is None else start
+        self.end_node = Node.objects.get(
+            node_id=links[-1].target) if end is None else start
 
         self.link_dirs = [link.link_dir for link in links]
         # [{'lat': <val>, 'lng': <val>}, ...]
-        lng_lat_tuples = list(itertools.chain.from_iterable(link.wkb_geometry.tuple for link in links))
+        lng_lat_tuples = list(itertools.chain.from_iterable(
+            link.wkb_geometry.tuple for link in links))
         seen_tuples = set()
         self.coordinates = []
         for tup in lng_lat_tuples:

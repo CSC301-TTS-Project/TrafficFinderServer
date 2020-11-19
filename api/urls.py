@@ -7,5 +7,6 @@ urlpatterns = [
     path('insertNode', insert_node),
     path('modifyNode', modify_node),
     path('deleteNode', delete_node),
+    path('getKeys', get_api_keys),
     path('getTrafficData', get_traffic_data)
 ]

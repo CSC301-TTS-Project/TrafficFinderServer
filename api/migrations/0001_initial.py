@@ -22,7 +22,8 @@ class Migration(migrations.Migration):
                 ('source', models.IntegerField(blank=True, null=True)),
                 ('target', models.IntegerField(blank=True, null=True)),
                 ('length', models.FloatField(blank=True, null=True)),
-                ('wkb_geometry', django.contrib.gis.db.models.fields.LineStringField(blank=True, null=True, srid=4326)),
+                ('wkb_geometry', django.contrib.gis.db.models.fields.LineStringField(
+                    blank=True, null=True, srid=4326)),
             ],
             options={
                 'db_table': 'links',
@@ -34,7 +35,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('ogc_fid', models.AutoField(primary_key=True, serialize=False)),
                 ('node_id', models.IntegerField(blank=True, null=True)),
-                ('wkb_geometry', django.contrib.gis.db.models.fields.PointField(blank=True, null=True, srid=4326)),
+                ('wkb_geometry', django.contrib.gis.db.models.fields.PointField(
+                    blank=True, null=True, srid=4326)),
             ],
             options={
                 'db_table': 'nodes',
@@ -44,7 +46,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TravelTime',
             fields=[
-                ('link_dir', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('link_dir', models.CharField(
+                    max_length=50, primary_key=True, serialize=False)),
                 ('tx', models.DateTimeField()),
                 ('length', models.FloatField(blank=True, null=True)),
                 ('mean', models.FloatField(blank=True, null=True)),
