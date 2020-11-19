@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if 'CLOUD_BUILD' in os.environ:
     # environment variables loaded in from aws secrets manager
-    from .secrets import load_secrets_env
+    from .secrets import get_secrets_dict
     secrets = load_secrets_env()
     DATABASES = {
         'default': {
