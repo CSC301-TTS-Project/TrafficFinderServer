@@ -120,7 +120,6 @@ def modify_node(request):
         return JsonResponse(ret_json, safe=False)
 
     except (KeyError, ValueError) as e:
-        print(e)
         log.error(e)
         return HttpResponseBadRequest("Malformed Input")
 
@@ -195,9 +194,12 @@ def get_traffic_data(request):
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
 
+        links_dirs_list = list(itertools.chain.from_iterable([seg.link_dirs for seg in route_segments]))
+        if len(links_dirs_list) <= 0:
+            return HttpResponse("No route data to fetch.")
+
         route_here_data = TravelTime.get_data_for_route(
-            list(itertools.chain.from_iterable(
-                [seg.link_dirs for seg in route_segments])), date_range, days_of_week,
+            links_dirs_list, date_range, days_of_week,
             hour_range)
 
         response_csv = ",".join(route_here_data[0].keys())
