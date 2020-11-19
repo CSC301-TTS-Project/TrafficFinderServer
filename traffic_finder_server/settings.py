@@ -18,7 +18,6 @@ from django.core.management.utils import get_random_secret_key
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -79,14 +78,18 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-if 'PROD' in os.environ:
-    #TODO: UPDATE PROD SETTINGS
-    # Configured on Elastic Beanstalk EC2 Instances
+if 'CLOUD_BUILD' in os.environ:
+    # environment variables loaded in from aws secrets manager
+    from .secrets import load_secrets_env
+    load_secrets_env()
     DATABASES = {
-        # USE RDS; Should be read only.
         'default': {
-            'ENGINE': 'django.db.backends.',
-            'NAME': os.environ['RDS_DB_NAME'],
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
+            'NAME': os.environ['RDS_TRAFFIC_FINDER_DB'],
+            'TEST': {
+                # since it's readonly anyways, don't need to copy into a new db
+                'NAME': os.environ['RDS_TRAFFIC_FINDER_DB']
+            },
             'USER': os.environ['RDS_USERNAME'],
             'PASSWORD': os.environ['RDS_PASSWORD'],
             'HOST': os.environ['RDS_HOSTNAME'],
@@ -94,23 +97,17 @@ if 'PROD' in os.environ:
         }
     }
     DDB_ENDPOINT = None
-elif 'BUILD' in os.environ:
-    #TODO: edit buildspec and config
-    config = configparser.ConfigParser()
-    config.read('traffic_finder_server/config/test.ini')
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': config['POSTGRES']['NAME'],
-            'TEST': {
-                'NAME': config['POSTGRES']['NAME']
-            },
-            'HOST': config['POSTGRES']['HOST'],
-            'PORT': config['POSTGRES']['PORT']
-        }
-    }
-    DDB_ENDPOINT = config['DYNAMO_DB']['ENDPOINT']
-    DEFAULT_DDB_USER_ID = config['DYNAMO_DB']['DEFAULT_USER_ID']
+
+    # Hardcoded for now
+    DEFAULT_DDB_USER_ID = "USER"
+    DEFAULT_ROUTE = 0
+
+    if "PROD" in os.environ:
+        DDB_ROUTE_TABLE_NAME = os.environ["DDB_ROUTE_TABLE_NAME"]
+        DDB_SEGMENT_TABLE_NAME = os.environ["DDB_SEGMENT_TABLE_NAME"]
+    else:
+        DDB_ROUTE_TABLE_NAME = os.environ["DDB_TEST_ROUTE_TABLE_NAME"]
+        DDB_SEGMENT_TABLE_NAME = os.environ["DDB_TEST_SEGMENT_TABLE_NAME"]
 else:
     # Read Local Config
     config = configparser.ConfigParser()
@@ -122,7 +119,7 @@ else:
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': config['POSTGRES']['NAME'],
             'TEST': {
-                #since it's readonly anyways, don't need to copy into a new db
+                # since it's readonly anyways, don't need to copy into a new db
                 'NAME': config['POSTGRES']['NAME']
             }
         }
@@ -150,7 +147,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

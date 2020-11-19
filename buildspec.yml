@@ -1,5 +1,8 @@
 version: 0.2
 
+env:
+  variables:
+    CLOUD_BUILD: "True"
 phases:
   install:
     runtime-versions:
@@ -8,6 +11,8 @@ phases:
       - pip install -r requirements.txt
   build:
     commands:
+      - python manage.py makemigrations
+      - python manage.py migrate
       - python manage.py test --keepdb
   post_build:
     commands:

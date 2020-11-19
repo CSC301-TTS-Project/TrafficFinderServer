@@ -1,5 +1,8 @@
 version: 0.2
 
+env:
+  variables:
+    CLOUD_BUILD: "True"
 phases:
   install:
     runtime-versions:
@@ -8,8 +11,10 @@ phases:
       - pip install -r requirements.txt
   build:
     commands:
-      - pylint --load-plugins pylint_django traffic_finder_server api
+      - python manage.py makemigrations
+      - python manage.py migrate
       - python manage.py test --keepdb
+      - pylint --load-plugins pylint_django traffic_finder_server api
   post_build:
     commands:
       - echo Build passed on `date`
