@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 if 'CLOUD_BUILD' in os.environ:
     # environment variables loaded in from aws secrets manager
     from .secrets import get_secrets_dict
-    secrets = load_secrets_env()
+    secrets = get_secrets_dict()
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
