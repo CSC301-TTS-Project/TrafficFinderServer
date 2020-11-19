@@ -157,14 +157,14 @@ class ViewTest(TestCase):
         }), content_type="application/json")
         self.assertEqual(response_3.status_code, 200)
 
-        response_4 = client.patch('/api/modifyNode', json.dumps({
+        response_modify = client.patch('/api/modifyNode', json.dumps({
             'route': 0,
             'index': 3,
             'lat': 43.747965,
             'lng': -79.631314,
         }), content_type="application/json")
-        self.assertEqual(response_4.status_code, 200)
+        self.assertEqual(response_modify.status_code, 200)
 
-        assert json.loads(response_4.content) == {"3": {"start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
-                                                        "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
-                                                        "coordinates": [[-79.63243, 43.74774], [-79.63183, 43.74789], [-79.63147, 43.74798], [-79.63134, 43.74801]]}}
+        assert json.loads(response_modify.content) == {"3": {"start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
+                                                             "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
+                                                             "coordinates": [[-79.63243, 43.74774], [-79.63183, 43.74789], [-79.63147, 43.74798], [-79.63134, 43.74801]]}}
