@@ -111,6 +111,9 @@ if 'CLOUD_BUILD' in os.environ:
     else:
         DDB_ROUTE_TABLE_NAME = secrets["DDB_TEST_ROUTE_TABLE_NAME"]
         DDB_SEGMENT_TABLE_NAME = secrets["DDB_TEST_SEGMENT_TABLE_NAME"]
+
+    HERE_PUBLIC_KEY = secrets['HERE_PUBLIC_KEY']
+    MAPBOX_PUBLIC_KEY = secrets['HERE_PUBLIC_KEY']
 else:
     # Read Local Config
     config = configparser.ConfigParser()
@@ -132,6 +135,9 @@ else:
     DEFAULT_ROUTE = int(config['DYNAMO_DB']['DEFAULT_ROUTE'])
     DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
     DDB_SEGMENT_TABLE_NAME = config['DYNAMO_DB']['DDB_SEGMENT_TABLE_NAME']
+
+    HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
+    MAPBOX_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

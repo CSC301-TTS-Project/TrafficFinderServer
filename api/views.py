@@ -7,6 +7,7 @@ from .ddb_actions import get_route_segments, get_route_segment_ids, insert_route
 from django.conf import settings
 from api.models import Node, Segment, TravelTime
 import logging
+from .api_keys import api_keys_dict
 
 # Set this in config, should be set using auth header later
 USER = settings.DEFAULT_DDB_USER_ID
@@ -155,6 +156,10 @@ def get_traffic_data(request):
     except KeyError as e:
         log.error(f"Got the following error during getTrafficData {e}")
         return HttpResponseBadRequest("Malformed Input")
+
+
+def get_api_keys(request):
+    return JsonResponse(api_keys_dict(), safe=False)
 
 
 # HARD CODED VARIANTS BELOW
