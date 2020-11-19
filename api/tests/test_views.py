@@ -10,7 +10,8 @@ class ViewTest(TestCase):
 
     def test_get_route(self):
         client = Client()
-        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.generic(
+            method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), [])
 
@@ -39,7 +40,8 @@ class ViewTest(TestCase):
             'coordinates': [[-79.63473, 43.75079], [-79.6347, 43.75094], [-79.6347, 43.75126]]
         })
 
-        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.generic(
+            method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(json.loads(response.content), [{
@@ -78,7 +80,8 @@ class ViewTest(TestCase):
         # should be empty
         self.assertEqual(json.loads(response_3.content), {})
 
-        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.generic(
+            method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), [{
@@ -114,10 +117,11 @@ class ViewTest(TestCase):
         }))
 
         assert response.status_code == 200
-        assert response._headers['content-type'] == ('Content-Type', 'text/csv')
+        assert response._headers['content-type'] == (
+            'Content-Type', 'text/csv')
         assert response.content == b"hour,link_dir,length,hourly_mean_tt,link_obs\n" \
-                                   b"08:00:00,29492876F,52,41.0,1\n" \
-                                   b"10:00:00,29492876F,52,11.5,1\n"
+            b"08:00:00,29492876F,52,41.0,1\n" \
+            b"10:00:00,29492876F,52,11.5,1\n"
 
     def test_modify_route(self):
         client = Client()
