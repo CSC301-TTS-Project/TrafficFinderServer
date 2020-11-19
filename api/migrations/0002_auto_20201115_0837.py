@@ -13,11 +13,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='HereData',
             fields=[
-                ('link_dir', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('link_dir', models.CharField(
+                    max_length=50, primary_key=True, serialize=False)),
                 ('tx', models.DateTimeField()),
                 ('length', models.IntegerField(blank=True, null=True)),
-                ('mean', models.DecimalField(blank=True, decimal_places=65535, max_digits=65535, null=True)),
-                ('stddev', models.DecimalField(blank=True, decimal_places=65535, max_digits=65535, null=True)),
+                ('mean', models.DecimalField(blank=True,
+                                             decimal_places=65535, max_digits=65535, null=True)),
+                ('stddev', models.DecimalField(blank=True,
+                                               decimal_places=65535, max_digits=65535, null=True)),
                 ('confidence', models.IntegerField(blank=True, null=True)),
                 ('pct_85', models.IntegerField(blank=True, null=True)),
                 ('pct_95', models.IntegerField(blank=True, null=True)),

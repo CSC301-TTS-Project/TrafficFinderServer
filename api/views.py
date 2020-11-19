@@ -27,7 +27,8 @@ def get_route(request):
         route = int(json_data["route"])
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
-        return JsonResponse([segment.to_json() for segment in route_segments], safe=False)
+        return JsonResponse([segment.to_json()
+                             for segment in route_segments], safe=False)
     except KeyError as e:
         log.error(f"Got the following error during get_route {e}")
         return HttpResponseBadRequest("Malformed Input")
@@ -53,7 +54,8 @@ def insert_node(request):
             segment_ids = get_route_segment_ids(USER, route)
 
             if not 0 <= segment_idx < len(segment_ids) + 1:
-                return HttpResponseBadRequest(f"Passed index {segment_idx} out of bounds.")
+                return HttpResponseBadRequest(
+                    f"Passed index {segment_idx} out of bounds.")
             prev_node_segment = get_route_segments(
                 [segment_ids[segment_idx - 1]])[0]
             prev_node = prev_node_segment.end_node
@@ -86,7 +88,8 @@ def modify_node(request):
         lng = float(json_data["lng"])
         segment_ids = get_route_segment_ids(USER, route)
         if not 0 <= segment_idx < len(segment_ids):
-            return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
+            return HttpResponseBadRequest(
+                f"Passed segment_idx {segment_idx} out of bounds.")
         new_node = Node.objects.nearest_node(lat, lng)
         ret_json = {}
         if segment_idx - 1 >= 0:
@@ -132,7 +135,8 @@ def delete_node(request):
 
         segment_ids = get_route_segment_ids(USER, route)
         if not 0 <= segment_idx < len(segment_ids):
-            return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
+            return HttpResponseBadRequest(
+                f"Passed segment_idx {segment_idx} out of bounds.")
 
         ret_json = {}
         if segment_idx - 1 >= 0 and segment_idx + 1 < len(segment_ids):
@@ -156,9 +160,11 @@ def delete_node(request):
                 [segment_ids[segment_idx + 1]])[0]
             successor_node = successor_node_segment.end_node
             new_starting_segment = Segment.singular(successor_node)
-            update_route_segment(USER, route, segment_idx + 1, new_starting_segment)
+            update_route_segment(
+                USER, route, segment_idx + 1, new_starting_segment)
             ret_json[segment_idx] = new_starting_segment.to_json()
-        # otherwise, don't need to send back updates since it was the last node segment that was deleted
+        # otherwise, don't need to send back updates since it was the last node
+        # segment that was deleted
         delete_route_segment(USER, route, segment_idx)
         return JsonResponse(ret_json, safe=False)
     except (KeyError, ValueError) as e:
@@ -192,7 +198,8 @@ def get_traffic_data(request):
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
 
-        links_dirs_list = list(itertools.chain.from_iterable([seg.link_dirs for seg in route_segments]))
+        links_dirs_list = list(itertools.chain.from_iterable(
+            [seg.link_dirs for seg in route_segments]))
         if len(links_dirs_list) <= 0:
             return HttpResponse("No route data to fetch.")
 

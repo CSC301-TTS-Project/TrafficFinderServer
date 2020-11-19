@@ -8,15 +8,22 @@ phases:
     runtime-versions:
       python: 3.x
     commands:
+      - add-apt-repository ppa:ubuntugis/ppa
+      - apt-get update
+      - yes | apt-get install binutils libproj-dev gdal-bin
       - pip install -r requirements.txt
   build:
     commands:
       - python manage.py makemigrations
       - python manage.py migrate
-      - python manage.py test --keepdb
-      - pylint --load-plugins pylint_django traffic_finder_server api
+      - python manage.py test --keepdb --nologcapture
+      - pylint --fail-under=7 --load-plugins pylint_django traffic_finder_server api
   post_build:
     commands:
-      - echo Build passed on `date`
+      - echo Build completed on `date`
+artifacts:
+  type: zip
+  files:
+    - ./*
 
 

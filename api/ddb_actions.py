@@ -58,7 +58,8 @@ def _get_route_table(reset_table=False):
             _route_table = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
             _route_table.wait_until_exists()
 
-            # initialize default route; implementation will change for deliverable 3
+            # initialize default route; implementation will change for
+            # deliverable 3
             _route_table.put_item(
                 Item={
                     "UserId": settings.DEFAULT_DDB_USER_ID,
@@ -140,7 +141,8 @@ def get_route_segments(segment_ids):
         )
         unprocessed_keys.clear()
         if len(response["UnprocessedKeys"]) > 0:
-            unprocessed_keys.append([x['S'] for x in response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"]])
+            unprocessed_keys.append(
+                [x['S'] for x in response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"]])
         for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
             segments[item["SegmentId"]] = pickle.loads(item["Segment"].value)
     return [segments[segment_id] for segment_id in segment_ids]
