@@ -11,7 +11,8 @@ class ViewTest(TestCase):
 
     def test_get_route(self):
         client = Client()
-        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.generic(
+            method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), [])
 
@@ -40,7 +41,8 @@ class ViewTest(TestCase):
             'coordinates': [[-79.63473, 43.75079], [-79.6347, 43.75094], [-79.6347, 43.75126]]
         })
 
-        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.generic(
+            method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
         self.assertEqual(response.status_code, 200)
 
         # Corresponds to https://jsfiddle.net/176tzbq8/2/
@@ -80,7 +82,8 @@ class ViewTest(TestCase):
         # should be empty
         self.assertEqual(json.loads(response_3.content), {})
 
-        response = client.generic(method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.generic(
+            method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), [{
@@ -130,3 +133,49 @@ class ViewTest(TestCase):
             'HERE_PUBLIC_KEY': settings.HERE_PUBLIC_KEY,
             'MAPBOX_PUBLIC_KEY': settings.MAPBOX_PUBLIC_KEY
         })
+
+    def test_modify_route(self):
+        client = Client()
+        response_1 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75079,
+            'lng': -79.63473,
+            'index': 0
+        }), content_type="application/json")
+        self.assertEqual(response_1.status_code, 200)
+
+        response_2 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.749309,
+            'lng': -79.635237,
+            'index': 1
+        }), content_type="application/json")
+        self.assertEqual(response_2.status_code, 200)
+
+        response_3 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.747832,
+            'lng': -79.632544,
+            'index': 2
+        }), content_type="application/json")
+        self.assertEqual(response_3.status_code, 200)
+
+        response_4 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.747521,
+            'lng': -79.633854,
+            'index': 3
+        }), content_type="application/json")
+        self.assertEqual(response_3.status_code, 200)
+
+        response_modify = client.patch('/api/modifyNode', json.dumps({
+            'route': 0,
+            'index': 3,
+            'lat': 43.747965,
+            'lng': -79.631314,
+        }), content_type="application/json")
+        self.assertEqual(response_modify.status_code, 200)
+
+        assert json.loads(response_modify.content) == {"3": {"start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
+                                                             "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
+                                                             "coordinates": [[-79.63243, 43.74774], [-79.63183, 43.74789], [-79.63147, 43.74798], [-79.63134, 43.74801]]}}
