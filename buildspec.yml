@@ -8,7 +8,8 @@ phases:
     runtime-versions:
       python: 3.x
     commands:
-      - yum -y install epel-release
+      - wget https://github.com/OSGeo/gdal/releases/download/v3.2.0/gdal-3.2.0.tar.gz && tar -xvf gdal-3.2.0.tar.gz
+      - cd gdal-3.2.0 && ./configure --with-proj=/usr/local --with-python && sudo make && sudo make install
       - pip install -r requirements.txt
   build:
     commands:
