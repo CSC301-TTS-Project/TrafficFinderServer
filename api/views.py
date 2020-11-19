@@ -102,7 +102,7 @@ def delete_node(request):
             successor_node_segment = get_route_segments([segment_ids[segment_idx + 1]])[0]
             successor_node = successor_node_segment.end_node
             new_starting_segment = Segment.singular(successor_node)
-            update_route_segment(USER, route, segment_idx, new_starting_segment)
+            update_route_segment(USER, route, segment_idx + 1, new_starting_segment)
             ret_json[segment_idx] = new_starting_segment.to_json()
         # otherwise, don't need to send back updates since it was the last node segment that was deleted
         delete_route_segment(USER, route, segment_idx)
