@@ -53,21 +53,16 @@ def insert_node(request):
 
             if not 0 <= segment_idx < len(segment_ids) + 1:
                 return HttpResponseBadRequest(f"Passed index {segment_idx} out of bounds.")
-            prev_node_segment = get_route_segments(
-                [segment_ids[segment_idx - 1]])[0]
+            prev_node_segment = get_route_segments([segment_ids[segment_idx - 1]])[0]
             prev_node = prev_node_segment.end_node
-            new_segment = Segment.route_segment_between_nodes(
-                prev_node, new_node)
+            new_segment = Segment.route_segment_between_nodes(prev_node, new_node)
             ret_json[segment_idx] = new_segment.to_json()
             if segment_idx + 1 < len(segment_ids):
                 # update successor segment
-                successor_node_segment = get_route_segments(
-                    [segment_ids[segment_idx + 1]])[0]
+                successor_node_segment = get_route_segments([segment_ids[segment_idx + 1]])[0]
                 successor_node = successor_node_segment.end_node
-                new_successor_segment = Segment.route_segment_between_nodes(
-                    new_node, successor_node)
-                update_route_segment(
-                    USER, route, segment_idx + 1, new_successor_segment)
+                new_successor_segment = Segment.route_segment_between_nodes(new_node, successor_node)
+                update_route_segment(USER, route, segment_idx + 1, new_successor_segment)
                 ret_json[segment_idx + 1] = new_successor_segment.to_json()
             insert_route_segment(USER, route, segment_idx, new_segment)
         return JsonResponse(ret_json, safe=False)
@@ -77,51 +72,7 @@ def insert_node(request):
 
 
 def modify_node(request):
-    try:
-        json_data = json.loads(request.body)
-        route = json_data["route"]
-        segment_idx = int(json_data["index"])
-        lat = float(json_data["lat"])
-        lng = float(json_data["lng"])
-        segment_ids = get_route_segment_ids(USER, route)
-        if not 0 <= segment_idx < len(segment_ids):
-            return HttpResponseBadRequest(f"Passed segment_idx {segment_idx} out of bounds.")
-        new_node = Node.objects.nearest_node(lat, lng)
-        ret_json = {}
-        if segment_idx - 1 >= 0:
-            # There is a prev segment. Route from prev node to new node
-            prev_node_segment = get_route_segments(
-                [segment_ids[segment_idx - 1]])[0]
-            prev_node = prev_node_segment.end_node
-            modified_segment = Segment.route_segment_between_nodes(
-                prev_node, new_node)
-            update_route_segment(
-                USER, route, segment_idx, modified_segment)
-        else:
-            # This is the first node.
-            modified_segment = Segment.singular(new_node)
-            update_route_segment(USER, route, segment_idx,
-                                 modified_segment)
-        ret_json[segment_idx] = modified_segment.to_json()
-
-        if segment_idx + 1 < len(segment_ids):
-            # There is a next segment. Route from new node to next node.
-            successor_node_segment = get_route_segments(
-                [segment_ids[segment_idx + 1]])[0]
-            successor_node = successor_node_segment.end_node
-            new_successor_segment = Segment.route_segment_between_nodes(
-                new_node, successor_node)
-            update_route_segment(USER, route, segment_idx,
-                                 new_successor_segment)
-            ret_json[segment_idx + 1] = new_successor_segment.to_json()
-
-        # return any edits.
-        return JsonResponse(ret_json, safe=False)
-
-    except (KeyError, ValueError) as e:
-        print(e)
-        log.error(e)
-        return HttpResponseBadRequest("Malformed Input")
+    return HttpResponse()
 
 
 def delete_node(request):
@@ -137,27 +88,21 @@ def delete_node(request):
         ret_json = {}
         if segment_idx - 1 >= 0 and segment_idx + 1 < len(segment_ids):
             # deleting an intermediate segment
-            prev_node_segment = get_route_segments(
-                [segment_ids[segment_idx - 1]])[0]
+            prev_node_segment = get_route_segments([segment_ids[segment_idx - 1]])[0]
             prev_node = prev_node_segment.end_node
 
-            successor_node_segment = get_route_segments(
-                [segment_ids[segment_idx + 1]])[0]
+            successor_node_segment = get_route_segments([segment_ids[segment_idx + 1]])[0]
             successor_node = successor_node_segment.end_node
 
-            new_successor_segment = Segment.route_segment_between_nodes(
-                prev_node, successor_node)
-            update_route_segment(
-                USER, route, segment_idx + 1, new_successor_segment)
+            new_successor_segment = Segment.route_segment_between_nodes(prev_node, successor_node)
+            update_route_segment(USER, route, segment_idx + 1, new_successor_segment)
             ret_json[segment_idx] = new_successor_segment.to_json()
         elif segment_idx + 1 < len(segment_ids):
             # deleting first node
-            successor_node_segment = get_route_segments(
-                [segment_ids[segment_idx + 1]])[0]
+            successor_node_segment = get_route_segments([segment_ids[segment_idx + 1]])[0]
             successor_node = successor_node_segment.end_node
             new_starting_segment = Segment.singular(successor_node)
-            update_route_segment(USER, route, segment_idx,
-                                 new_starting_segment)
+            update_route_segment(USER, route, segment_idx, new_starting_segment)
             ret_json[segment_idx] = new_starting_segment.to_json()
         # otherwise, don't need to send back updates since it was the last node segment that was deleted
         delete_route_segment(USER, route, segment_idx)
@@ -194,8 +139,7 @@ def get_traffic_data(request):
         route_segments = get_route_segments(route_segment_ids)
 
         route_here_data = TravelTime.get_data_for_route(
-            list(itertools.chain.from_iterable(
-                [seg.link_dirs for seg in route_segments])), date_range, days_of_week,
+            list(itertools.chain.from_iterable([seg.link_dirs for seg in route_segments])), date_range, days_of_week,
             hour_range)
 
         response_csv = ",".join(route_here_data[0].keys())
@@ -206,4 +150,102 @@ def get_traffic_data(request):
         return HttpResponse(response_csv, content_type='text/csv')
     except KeyError as e:
         log.error(f"Got the following error during getTrafficData {e}")
+        return HttpResponseBadRequest("Malformed Input")
+
+
+# HARD CODED VARIANTS BELOW
+# =======================DELETE ALL OF BELOW IN FINAL==========================
+
+
+def hdc_index(request):
+    return HttpResponse("Hello World!")
+
+
+def hdc_getRoute(request):
+    """ Expect the json fields route. """
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
+    except KeyError:
+        return HttpResponseBadRequest("Malformed Input")
+
+
+def hdc_insertNode(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        lat = json_data["lat"]
+        lng = json_data["lng"]
+        segment_idx = json_data["index"]
+        return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
+    except KeyError:
+        return HttpResponseBadRequest("Malformed Input")
+
+
+def hdc_modifyNode(request):
+    return HttpResponse("Modified Node")
+
+
+def hdc_deleteNode(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        return JsonResponse(json.dumps({"KEY": "Value"}), safe=False)
+    except KeyError:
+        return HttpResponseBadRequest("Malformed Input")
+
+
+def hdc_addNodeToRoute(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        lat = json_data["lat"]
+        lng = json_data["lng"]
+        assert isinstance(lat, float) and isinstance(lng, float) and isinstance(
+            segment_idx, int) and isinstance(route, int)
+        return JsonResponse(json.dumps(
+            [{"id": 123, "lat": 43.651072, "lng": -79.347016}, {"id": 12, "lat": 43.651070, "lng": -79.347015},
+             {"id": 17, "lat": lat, "lng": lng}]), safe=False)
+    except (KeyError, AssertionError):
+        return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index, lat, lng")
+
+
+def hdc_modifyRouteNode(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        lat = json_data["lat"]
+        lng = json_data["lng"]
+        assert isinstance(lat, float) and isinstance(lng, float) and isinstance(
+            segment_idx, int) and isinstance(route, int)
+        return JsonResponse(json.dumps([{"index": 1, "id": 123, "lat": 43.651072, "lng": -79.347016},
+                                        {"index": 2, "id": 12, "lat": 43.651070, "lng": -79.347015},
+                                        {"index": 3, "id": 17, "lat": lat, "lng": lng}]), safe=False)
+    except (KeyError, AssertionError):
+        return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index, lat, lng")
+
+
+def hdc_deleteRouteNode(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        segment_idx = json_data["index"]
+        assert isinstance(segment_idx, int) and isinstance(route, int)
+        return JsonResponse(json.dumps([{"index": 1, "id": 123, "lat": 43.651072, "lng": -79.347016},
+                                        {"index": 2, "id": 12, "lat": 43.651070, "lng": -79.347015}]), safe=False)
+    except (KeyError, AssertionError):
+        return HttpResponseBadRequest("Malformed Input.\nPlease Use JSON keys: route, index")
+
+
+def hdc_getTrafficData(request):
+    json_data = json.loads(request.body)
+    try:
+        route = json_data["route"]
+        assert isinstance(route, int)
+        return HttpResponse("0, 1, 2, 3, 4, 5\n6, 7, 8, 9, 10, 11\n12, 13, 14, 15, 16, 17, 18")
+    except (KeyError, AssertionError):
         return HttpResponseBadRequest("Malformed Input")
