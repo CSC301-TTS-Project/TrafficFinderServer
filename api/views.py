@@ -35,6 +35,7 @@ def get_route(request):
 def insert_node(request):
     try:
         json_data = json.loads(request.body)
+        print(json_data)
         route = int(json_data["route"])
         lat = float(json_data["lat"])
         lng = float(json_data["lng"])
@@ -125,6 +126,7 @@ def modify_node(request):
 
 
 def delete_node(request):
+    # TODO: After node deletion, update indices to match
     try:
         json_data = json.loads(request.body)
         route = json_data["route"]
