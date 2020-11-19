@@ -81,19 +81,19 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 if 'CLOUD_BUILD' in os.environ:
     # environment variables loaded in from aws secrets manager
     from .secrets import load_secrets_env
-    load_secrets_env()
+    secrets = load_secrets_env()
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': os.environ['RDS_TRAFFIC_FINDER_DB'],
+            'NAME': secrets['RDS_TRAFFIC_FINDER_DB'],
             'TEST': {
                 # since it's readonly anyways, don't need to copy into a new db
-                'NAME': os.environ['RDS_TRAFFIC_FINDER_DB']
+                'NAME': secrets['RDS_TRAFFIC_FINDER_DB']
             },
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT']
+            'USER': secrets['RDS_USERNAME'],
+            'PASSWORD': secrets['RDS_PASSWORD'],
+            'HOST': secrets['RDS_HOSTNAME'],
+            'PORT': secrets['RDS_PORT']
         }
     }
     DDB_ENDPOINT = None
@@ -103,11 +103,11 @@ if 'CLOUD_BUILD' in os.environ:
     DEFAULT_ROUTE = 0
 
     if "PROD" in os.environ:
-        DDB_ROUTE_TABLE_NAME = os.environ["DDB_ROUTE_TABLE_NAME"]
-        DDB_SEGMENT_TABLE_NAME = os.environ["DDB_SEGMENT_TABLE_NAME"]
+        DDB_ROUTE_TABLE_NAME = secrets["DDB_ROUTE_TABLE_NAME"]
+        DDB_SEGMENT_TABLE_NAME = secrets["DDB_SEGMENT_TABLE_NAME"]
     else:
-        DDB_ROUTE_TABLE_NAME = os.environ["DDB_TEST_ROUTE_TABLE_NAME"]
-        DDB_SEGMENT_TABLE_NAME = os.environ["DDB_TEST_SEGMENT_TABLE_NAME"]
+        DDB_ROUTE_TABLE_NAME = secrets["DDB_TEST_ROUTE_TABLE_NAME"]
+        DDB_SEGMENT_TABLE_NAME = secrets["DDB_TEST_SEGMENT_TABLE_NAME"]
 else:
     # Read Local Config
     config = configparser.ConfigParser()

@@ -1,10 +1,9 @@
 import boto3
 from botocore.exceptions import ClientError
 import json
-import os
 
 
-def load_secrets_env():
+def get_secrets_dict():
     secret_name = "TrafficFinder/API"
 
     # Create a Secrets Manager client
@@ -21,10 +20,4 @@ def load_secrets_env():
         raise e
     else:
         secret_dict = json.loads(get_secret_value_response['SecretString'])
-
-        for key, value in secret_dict.items():
-            os.environ['key'] = value
-
-
-if __name__ == '__main__':
-    load_secrets_env()
+        return secret_dict
