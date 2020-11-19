@@ -92,7 +92,7 @@ if 'CLOUD_BUILD' in os.environ:
             },
             'USER': secrets['RDS_USERNAME'],
             'PASSWORD': secrets['RDS_PASSWORD'],
-            'HOST': secrets['RDS_HOSTNAME'],
+            'HOST': secrets['RDS_HOST'],
             'PORT': secrets['RDS_PORT']
         }
     }
