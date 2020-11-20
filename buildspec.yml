@@ -2,7 +2,7 @@ version: 0.2
 
 eb_codebuild_settings:
   CodeBuildServiceRole: codebuild-TrafficFinderServer-service-role
-  ComputeType: UILD_GENERAL1_SMALL
+  ComputeType: BUILD_GENERAL1_SMALL
   Image: aws/codebuild/standard:4.0
   Timeout: 10
 
