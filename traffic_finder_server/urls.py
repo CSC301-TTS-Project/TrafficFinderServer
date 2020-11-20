@@ -18,7 +18,7 @@ from django.http import HttpResponse
 from django.urls import path, include
 
 def index(request):
-    return HttpResponse("You are at /")
+    return HttpResponse("Make api requests to /api/{request}")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
