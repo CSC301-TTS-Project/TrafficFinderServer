@@ -31,7 +31,8 @@ def get_route(request):
         return JsonResponse([segment.to_json()
                              for segment in route_segments], safe=False)
     except KeyError as e:
-        log.error(f"Got the following error during get_route: {traceback.format_exc()}")
+        log.error(
+            f"Got the following error during get_route: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 
@@ -77,7 +78,8 @@ def insert_node(request):
             insert_route_segment(USER, route, segment_idx, new_segment)
         return JsonResponse(ret_json, safe=False)
     except (KeyError, ValueError) as e:
-        log.error(f"Got the following error during insert_node: {traceback.format_exc()}")
+        log.error(
+            f"Got the following error during insert_node: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 
@@ -126,7 +128,8 @@ def modify_node(request):
         return JsonResponse(ret_json, safe=False)
 
     except (KeyError, ValueError) as e:
-        log.error(f"Got the following error during modify_node: {traceback.format_exc()}")
+        log.error(
+            f"Got the following error during modify_node: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 
@@ -172,7 +175,8 @@ def delete_node(request):
         delete_route_segment(USER, route, segment_idx)
         return JsonResponse(ret_json, safe=False)
     except (KeyError, ValueError) as e:
-        log.error(f"Got the following error during delete_node: {traceback.format_exc()}")
+        log.error(
+            f"Got the following error during delete_node: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 
@@ -217,7 +221,8 @@ def get_traffic_data(request):
             response_csv += '\n'
         return HttpResponse(response_csv, content_type='text/csv')
     except KeyError as e:
-        log.error(f"Got the following error during getTrafficData: {traceback.format_exc()}")
+        log.error(
+            f"Got the following error during getTrafficData: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 

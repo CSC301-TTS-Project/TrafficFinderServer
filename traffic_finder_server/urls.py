@@ -17,8 +17,11 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include
 
+
 def index(request):
+    """Just to make it easier to sanity check our endpoint"""
     return HttpResponse("Make api requests to /api/{request}")
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),

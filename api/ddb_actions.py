@@ -1,28 +1,28 @@
-from django.conf import settings
-import boto3
 import pickle
 import copy
 import uuid
+from django.conf import settings
+import boto3
 
 # Change with config later
 _DDB_ROUTE_TABLE_NAME = settings.DDB_ROUTE_TABLE_NAME
 _DDB_SEGMENT_TABLE_NAME = settings.DDB_SEGMENT_TABLE_NAME
 
-_ddb = None
-_route_table = None
-_sequence_table = None
+_DDB = None
+_ROUTE_TABLE = None
+_SEQUENCE_TABLE = None
 
 
 def _get_ddb():
-    global _ddb
-    if not _ddb:
-        _ddb = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
-    return _ddb
+    global _DDB
+    if not _DDB:
+        _DDB = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
+    return _DDB
 
 
 def _get_route_table(reset_table=False):
-    global _route_table
-    if not _route_table or reset_table:
+    global _ROUTE_TABLE
+    if not _ROUTE_TABLE or reset_table:
         try:
             _get_ddb().create_table(
                 AttributeDefinitions=[
@@ -55,24 +55,24 @@ def _get_route_table(reset_table=False):
             # table has already been created
             pass
         finally:
-            _route_table = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
-            _route_table.wait_until_exists()
+            _ROUTE_TABLE = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
+            _ROUTE_TABLE.wait_until_exists()
 
             # initialize default route; implementation will change for
             # deliverable 3
-            _route_table.put_item(
+            _ROUTE_TABLE.put_item(
                 Item={
                     "UserId": settings.DEFAULT_DDB_USER_ID,
                     "Route": settings.DEFAULT_ROUTE,
                     "SegmentIds": []
                 }
             )
-    return _route_table
+    return _ROUTE_TABLE
 
 
 def _get_segment_table(reset_table=False):
-    global _sequence_table
-    if not _sequence_table or reset_table:
+    global _SEQUENCE_TABLE
+    if not _SEQUENCE_TABLE or reset_table:
         try:
             _get_ddb().create_table(
                 AttributeDefinitions=[
@@ -97,9 +97,9 @@ def _get_segment_table(reset_table=False):
             # table has already been created
             pass
         finally:
-            _sequence_table = _get_ddb().Table(_DDB_SEGMENT_TABLE_NAME)
-            _sequence_table.wait_until_exists()
-    return _sequence_table
+            _SEQUENCE_TABLE = _get_ddb().Table(_DDB_SEGMENT_TABLE_NAME)
+            _SEQUENCE_TABLE.wait_until_exists()
+    return _SEQUENCE_TABLE
 
 
 def get_route_segment_ids(user_id, route):
@@ -122,7 +122,8 @@ def get_route_segments(segment_ids):
     """
     Get an ordered list of segments given a list of segment ids
     @param segment_ids: a list of segment ids
-    @return: ordered list of segments (each segment starts and ends with nodes that define the endpoints of the segment)
+    @return: ordered list of segments
+        (each segment starts and ends with nodes that define the endpoints of the segment)
     """
     # make sure table is active
     _get_segment_table()
@@ -142,7 +143,9 @@ def get_route_segments(segment_ids):
         unprocessed_keys.clear()
         if len(response["UnprocessedKeys"]) > 0:
             unprocessed_keys.append(
-                [x['S'] for x in response["UnprocessedKeys"][_DDB_SEGMENT_TABLE_NAME]["Keys"]])
+                [x['S']
+                 for x in response["UnprocessedKeys"]
+                 [_DDB_SEGMENT_TABLE_NAME]["Keys"]])
         for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
             segments[item["SegmentId"]] = pickle.loads(item["Segment"].value)
     return [segments[segment_id] for segment_id in segment_ids]
