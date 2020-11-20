@@ -28,7 +28,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not 'PROD' in os.environ
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -79,11 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 
-api_log_handler = {
-    "level": "DEBUG",
-    "class": "logging.StreamHandler"
-}
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if 'CLOUD_BUILD' in os.environ:
@@ -114,12 +109,6 @@ if 'CLOUD_BUILD' in os.environ:
     if "PROD" in os.environ:
         DDB_ROUTE_TABLE_NAME = secrets["DDB_ROUTE_TABLE_NAME"]
         DDB_SEGMENT_TABLE_NAME = secrets["DDB_SEGMENT_TABLE_NAME"]
-
-        api_log_handler = {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": "/opt/python/log/api.log",
-        }
     else:
         DDB_ROUTE_TABLE_NAME = secrets["DDB_TEST_ROUTE_TABLE_NAME"]
         DDB_SEGMENT_TABLE_NAME = secrets["DDB_TEST_SEGMENT_TABLE_NAME"]
@@ -150,17 +139,6 @@ else:
 
     HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
     MAPBOX_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "api_logs": api_log_handler
-    },
-    "loggers": {
-        "api_logs": {"handlers": ["api_logs"], "level": "DEBUG", "propagate": True}
-    },
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
