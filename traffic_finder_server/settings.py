@@ -108,6 +108,25 @@ if 'CLOUD_BUILD' in os.environ:
     if "PROD" in os.environ:
         DDB_ROUTE_TABLE_NAME = secrets["DDB_ROUTE_TABLE_NAME"]
         DDB_SEGMENT_TABLE_NAME = secrets["DDB_SEGMENT_TABLE_NAME"]
+
+        LOGGING = {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
+            },
+            "handlers": {
+                "api_logs": {
+                    "level": "DEBUG",
+                    "class": "logging.FileHandler",
+                    "filename": "/opt/python/log/api.log",
+                    "formatter": "verbose",
+                }
+            },
+            "loggers": {
+                "api_logs": {"handlers": ["api_logs"], "level": "DEBUG", "propagate": True}
+            },
+        }
     else:
         DDB_ROUTE_TABLE_NAME = secrets["DDB_TEST_ROUTE_TABLE_NAME"]
         DDB_SEGMENT_TABLE_NAME = secrets["DDB_TEST_SEGMENT_TABLE_NAME"]
