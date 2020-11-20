@@ -13,7 +13,7 @@ import traceback
 # Set this in config, should be set using auth header later
 USER = settings.DEFAULT_DDB_USER_ID
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("api_logs")
 
 
 def index(request):
