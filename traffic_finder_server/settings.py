@@ -119,7 +119,6 @@ if 'CLOUD_BUILD' in os.environ:
             "level": "DEBUG",
             "class": "logging.FileHandler",
             "filename": "/opt/python/log/api.log",
-            "formatter": "verbose"
         }
     else:
         DDB_ROUTE_TABLE_NAME = secrets["DDB_TEST_ROUTE_TABLE_NAME"]
@@ -155,9 +154,6 @@ else:
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
-    },
     "handlers": {
         "api_logs": api_log_handler
     },
