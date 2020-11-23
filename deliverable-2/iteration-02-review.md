@@ -8,12 +8,10 @@
 *   When: Thursday November 19th 5:00:00 EST
 *   Where: Zoom
 
-## 
-**Process - Reflection**
+## Process - Reflection
 
 
-#### 
-**Q1. Decisions that turned out well **
+####  Q1. Decisions that turned out well 
 
 ##### Team member roles
 
@@ -39,8 +37,7 @@ Having established the focus for our mvp, we created another set of mockups from
 Finally, another decision that turned out well was having come up with an API and architecture design early on, and having documents for our team members to refer to it. These designs provided a good foundation on which back-end components we would need and how they would interact with each other. They allowed us to know which tools to set up (e.g. databases, django server, and services in AWS, etc) and to know the approach that we would use to connect these. Furthermore, having documents with this information helped with our team communication since it was a good source of reference to understand how the integration between the front-end and the back-end would work, and to have a concrete API (expected requests and responses) for our implementation of the back-end.
 
 
-#### 
-**Q2. Decisions that did not turn out as well as we hoped **
+####  Q2. Decisions that did not turn out as well as we hoped 
 
 
 ##### Trello
@@ -58,7 +55,7 @@ Our initial assigned user stories were small and modular. We expected team membe
 We also had mid-week sprint check-ins to maintain further accountability during the sprint cycle and decrease the tendency to complete user stories right before the sprint meeting. However, the check-ins felt too rushed. There was generally not much to update on most team members only made significant progress on a user story after the weekly check-ins. Moreover, not all team members updated their mid-sprint check-ins.
 
 
-#### **Q3. **Planned **changes **
+#### Q3. Planned changes
 
 
 ##### Sprint cycle
@@ -99,8 +96,7 @@ Another improvement we want to make is to more accurately capture our work on ou
 Finally, another improvement we want to focus on is to update the progress of our tasks on trello. Mainly, when we’ve started working on a task, we would make sure we move it to “in progress” and when we’ve finished working on a task, we would move it to “completed”. This would allow our trello board to be an accurate reflection of our work and to enhance our team’s coordination of tasks and overall communication.
 
 
-## 
-**Product - Review**
+## Product - Review
 
 
 #### Q4. How was your product Demo

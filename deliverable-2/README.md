@@ -1,17 +1,14 @@
-# 
 ![alt_text](images/image1.png)
 
 
-## 
-**Description **
+### Description 
 
 The application we have created aims to provide a simple web interface so that consultants and traffic analysts (at Toronto Transportation Services) with non-technical backgrounds can acquire traffic data with ease. We have created a web-interface which creates queries by simple pin dropping on a map (similar to Google Maps) to create desired routes, and then a form to complete the rest of the parameters of the queries. By creating this application we allow the end-users (consultants and traffic analysts) to instantaneously and accurately acquire the data they need to make decisions. 
 
 The context required to understand this application is: without it, the process for an inquiry requires  an engineer to manually transcribe written requests to an SQL query which can then be saved and emailed back to the inquirer. This system is clearly wasteful for time and resources, and can also cause problems when requests aren’t well defined to the engineer. The Vulcan solutions query form doesn’t allow for details to be left out and an engineer at TTS does not need to be involved tending to data requests, thus solving the problems described.
 
 
-## 
-**Key Features**
+##  Key Features
 
 The key features of this app accessible by users are: \
 	1. Adding Nodes to map \
@@ -23,11 +20,7 @@ The current feature set provides the most basic functionality for a map. It is i
 It is important to note that the backend was focused on for this deliverable and backend implementations for modifying intermediate node coordinates, and handling multiple routes have been completed and tested. The full backend suite was demonstrated to the partner by running our tests cases and showing response bodies for example Postman requests.
 
 
-## 
-**Instructions**
-
-
-### Instructions
+## Instructions
 
 **NB: In the current state of the project, anyone can access the deployed version of the application.**
 
@@ -41,12 +34,12 @@ It is important to note that the backend was focused on for this deliverable and
 5. Once the user is satisfied with their chosen days of the week and their selected return values (Figure B), they can hit “download csv” to save a table of data about their drawn path.
 
 
-![alt_text](images/image2.jpg)
+![alt_text](./images/image2.png)
 
 
 Figure A - Side Menu
 
-![alt_text](images/image3.jpg)
+![alt_text](./images/image3.png)
 
 
 Figure B - Return Values Modal
@@ -64,8 +57,7 @@ The current usage is simple and can be accessed via the following link (path)
 2. Click on a different location to perform step 1, which will depict a new node and the path between the two nodes on the map.
 
 
-## 
-**Development requirements **
+## Development requirements
 
 The application can be run on Windows, Mac, and most flavors of Linux. The base requirements for this application are postgres (version 9.1+, must have extension postGIS and PGRouting), python3, DynamoDB virtualizer, and node.js. Specific requirements for python3 and Re-act are listed in a requirements.txt file and package.json files respectively. The guide below will help you install these dependencies.
 
@@ -95,8 +87,7 @@ This application requires the extensions PGRouting, PLPGSql, and PostGIS for Pos
 
 
 
-## 
-**Deployment and Github Workflow **
+## Deployment and Github Workflow 
 
 We segmented our work into frontend and backend teams which rely on a documented API to allow the teams to have an accepted language of communication. Internally, the naming conventions used by the teams conform to the language standards. The backend, which is written in Django, uses Pep-8 standards (applied via pylint8) while the frontend team, which writes in React, uses the React Standard which is enforced via JSLint.
 
@@ -127,9 +118,7 @@ Our pipeline automatically sends build artifacts to elastic beanstalk which star
 4. If deployment is not successful, a rollback procedure is initiated which pushes the backend to the earliest working legacy application
 5. Otherwise, old ec2 instances are terminated and re-released with updated builds.
 
-## 
-**Licenses **
-
+## Licenses
 
 <span style="text-decoration:underline;">What type of license will you apply to your codebase?</span>
 
