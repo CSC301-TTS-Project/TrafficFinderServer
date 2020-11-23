@@ -34,12 +34,12 @@ It is important to note that the backend was focused on for this deliverable and
 5. Once the user is satisfied with their chosen days of the week and their selected return values (Figure B), they can hit “download csv” to save a table of data about their drawn path.
 
 
-![alt_text](./images/image2.png)
+![alt_text](images/image2.png)
 
 
 Figure A - Side Menu
 
-![alt_text](./images/image3.png)
+![alt_text](images/image3.png)
 
 
 Figure B - Return Values Modal
