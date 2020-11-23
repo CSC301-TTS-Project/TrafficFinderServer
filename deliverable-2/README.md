@@ -35,13 +35,13 @@ It is important to note that the backend was focused on for this deliverable and
 
 
 <p float = "left">
-    <img src="images/image2.png">
+    <img src="images/image2.PNG">
 </p>
 
 Figure A - Side Menu
 
 <p float = "left">
-    <img src="images/image3.png">
+    <img src="images/image3.PNG">
 </p>
 
 Figure B - Return Values Modal
