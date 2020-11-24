@@ -19,19 +19,26 @@ The current feature set provides the most basic functionality for a map. It is i
 
 It is important to note that the backend was focused on for this deliverable and backend implementations for modifying intermediate node coordinates, and handling multiple routes have been completed and tested. The full backend suite was demonstrated to the partner by running our tests cases and showing response bodies for example Postman requests.
 
+The mockups for the MVP, which was the focus for this deliverable can be found here: https://www.figma.com/file/1VpJJ2yWHb7jmQaY8ECLuV/Toronto-Big-Data-MVP-Mockup?node-id=0%3A1
 
 ## Instructions
 
 **NB: In the current state of the project, anyone can access the deployed version of the application.**
 
+Access the deployed application here: [http://traffic-finder-static.s3-website.us-east-2.amazonaws.com/](http://traffic-finder-static.s3-website.us-east-2.amazonaws.com/)  
 
-1. Click anywhere on the screen to create a path 
+1a.Click anywhere on the screen to create select a location (wait a a few seconds - this will depict the nearest valid node to the desired location)
+1b. Click on a different location to perform step 1, which will depict a new node and the path between the two nodes on the map.
+
 2. After building a path, click the chevron on the top left to open the overlay menu
+
 3. In the menu, a user can specify a few attributes to download about the path they’ve drawn. (Figure A). The hour range and date range is fixed
     1. Days of the week
     2. Return Values
 4. ‘Return Values’ Opens up a modal that allows the user to further specify data about their chosen path.
-5. Once the user is satisfied with their chosen days of the week and their selected return values (Figure B), they can hit “download csv” to save a table of data about their drawn path.
+5. Once the user is satisfied with their chosen days of the week and their selected return values (Figure B), they can hit “download csv” to save a table of data about their drawn path. (hitting this button won't do anything in the front-end since this functionality is only implemented in the back-end at this stage).
+
+6. The ability to delete a node from a route is currently depicted by right-clicking on a node/location marker. This will colour the segment corresponding to the first node in the path in black, denoting it's been deleted. If multiple nodes are in the path, the user can right click on the last node of a path  multiple times, until all nodes have been marked in black - this would mean the entire route has been marked as deleted.
 
 
 <p float = "left">
@@ -46,17 +53,7 @@ Figure A - Side Menu
 
 Figure B - Return Values Modal
 
-**Testing the backend**
 
-Since a few backend features are not integrated with the front-end(Everything except inserting nodes. Other functionality that can be tested by making postman requests to the backend. More is elaborated in development requirements
-
-In the current MVP, we put emphasis on displaying nodes and paths on the Map.
-
-The current usage is simple and can be accessed via the following link (path)
-
-1. Click anywhere on the Map. This will depict the nearest TTS node from the clicked position. 
-
-2. Click on a different location to perform step 1, which will depict a new node and the path between the two nodes on the map.
 
 
 ## Development requirements
