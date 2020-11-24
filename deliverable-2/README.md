@@ -41,6 +41,7 @@ A demo video can be found here: https://drive.google.com/file/d/1AjBM7RQYU9ut13Z
     2. Return Values
 4. ‘Return Values’ Opens up a modal that allows the user to further specify data about their chosen path.
 5. Once the user is satisfied with their chosen days of the week and their selected return values (Figure B), they can hit “download csv” to save a table of data about their drawn path. (hitting this button won't do anything in the front-end since this functionality is only implemented in the back-end at this stage).
+A demo of the download functionality in the backend: https://drive.google.com/file/d/1ANnUsw6E0-SXWsirQeTA5xPx_jJmrOQm/view?usp=sharing
 
 6. The ability to delete a node from a route is currently depicted by right-clicking on a node/location marker. This will colour the segment corresponding to the first node in the path in black, denoting it's been deleted. If multiple nodes are in the path, the user can right click on the last node of a path  multiple times, until all nodes have been marked in black - this would mean the entire route has been marked as deleted.
 
