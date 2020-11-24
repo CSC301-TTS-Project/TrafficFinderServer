@@ -27,7 +27,11 @@ The mockups for the MVP, which was the focus for this deliverable can be found h
 
 Access the deployed application here: [http://traffic-finder-static.s3-website.us-east-2.amazonaws.com/](http://traffic-finder-static.s3-website.us-east-2.amazonaws.com/)  
 
+A demo video can be found here: https://drive.google.com/file/d/1F75BpZHG3WnCrs5lg8FTTNg4UOYKPfkS/view?usp=sharing
+
+
 1a.Click anywhere on the screen to create select a location (wait a a few seconds - this will depict the nearest valid node to the desired location)
+
 1b. Click on a different location to perform step 1, which will depict a new node and the path between the two nodes on the map.
 
 2. After building a path, click the chevron on the top left to open the overlay menu
