@@ -65,7 +65,7 @@ Figure B - Return Values Modal
 
 The application can be run on Windows, Mac, and most flavors of Linux. The base requirements for this application are postgres (version 9.1+, must have extension postGIS and PGRouting), python3, DynamoDB virtualizer, and node.js. Specific requirements for python3 and Re-act are listed in a requirements.txt file and package.json files respectively. The guide below will help you install these dependencies.
 
-Setting up application for personal machine (Mac OS and Linux guide. Tested on Catalina, High Sierra, and Ubuntu): \
+Setting up application for personal machine (Mac OS and Linux guide. Tested on Catalina, High Sierra, and Ubuntu; may have to build from source for RHEL/CentOS): \
 Preliminary setup: To begin install homebrew. This can be done by following the guide here: [https://docs.brew.sh/Installation](https://docs.brew.sh/Installation) \
 ===========================Frontend Setup=========================== \
 1. In terminal, type the command `brew install yarn` which will install yarn; an updated package manager similar to npm \
