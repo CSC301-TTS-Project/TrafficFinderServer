@@ -83,7 +83,7 @@ This application requires the extensions PGRouting, PLPGSql, and PostGIS for Pos
 [https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) \
 7. Run command `aws configure` and follow prompts to provide security credentials (ask an administrator for your Access Key ID and Secure Key Credentials). For region, type in ‘us-east-2’, and the rest of the fields can be left blank. \
 8. Download the dataset for postgres: \
-[LINK NEEDED] \
+https://drive.google.com/file/d/1VMj94tSTRI8mglgsfmKW2wdMxEyUBEmw/view?usp=sharing \
 9. Run postgres, create a database named “trafficfinder” and import the dataset to the database. Do not worry about role not found errors. \
 10. Start DynamoDB on your computer (use instructions from download link) \
 11. Run migrations to configure the server via: `python3 manage.py makemigrations && python3 manage.py migrate` \
