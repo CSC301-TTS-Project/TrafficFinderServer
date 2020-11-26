@@ -34,6 +34,23 @@ def get_route(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+def get_node(request):
+    try:
+        json_data = json.loads(request.body)
+        lat = float(json_data["lat"])
+        lng = float(json_data["lng"])
+        segment_idx = json_data["index"]
+        new_node = Node.objects.nearest_node(lat, lng)
+
+        ret_json = {}
+        new_segment = Segment.singular(new_node)
+        ret_json[segment_idx] = new_segment.to_json()
+        return JsonResponse(ret_json, safe=False)
+
+    except (KeyError, ValueError) as e:
+        log.error(e)
+        return HttpResponseBadRequest("Malformed Input")
+
 def insert_node(request):
     try:
         json_data = json.loads(request.body)
