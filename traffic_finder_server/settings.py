@@ -28,7 +28,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not 'PROD' in os.environ
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -84,6 +84,7 @@ WSGI_APPLICATION = 'traffic_finder_server.wsgi.application'
 if 'CLOUD_BUILD' in os.environ:
     # environment variables loaded in from aws secrets manager
     from .secrets import get_secrets_dict
+
     secrets = get_secrets_dict()
     DATABASES = {
         'default': {

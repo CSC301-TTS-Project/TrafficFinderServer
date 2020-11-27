@@ -109,12 +109,22 @@ class ViewTest(TestCase):
         }), content_type="application/json")
         self.assertEqual(response_2.status_code, 200)
 
-        response = client.generic(method="GET", path='/api/getTrafficData', data=json.dumps({
-            'route': 0,
-            'date_range': ["2018-09-01", "2018-09-07"],
-            'days_of_week': [0, 3, 5],
-            'hour_range': [7, 13]
-        }))
+        response = client.generic(
+            method="GET",
+            path='/api/getTrafficData',
+            data=json.dumps(
+                {
+                    'route': 0,
+                    'date_range': [
+                        "2018-09-01",
+                        "2018-09-07"],
+                    'days_of_week': [
+                        0,
+                        3,
+                        5],
+                    'hour_range': [
+                        7,
+                        13]}))
 
         # Corresponds to traffic data for route
         # https://jsfiddle.net/dh4w9ez2/12/
