@@ -137,8 +137,9 @@ else:
     DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
     DDB_SEGMENT_TABLE_NAME = config['DYNAMO_DB']['DDB_SEGMENT_TABLE_NAME']
 
-    HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
-    MAPBOX_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
+    HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['HERE_PUBLIC_KEY']])
+    MAPBOX_PUBLIC_KEY = str(
+        os.environ[config['API_KEYS']['MAPBOX_PUBLIC_KEY']])
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
