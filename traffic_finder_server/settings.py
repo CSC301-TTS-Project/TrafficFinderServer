@@ -114,7 +114,7 @@ if 'CLOUD_BUILD' in os.environ:
         DDB_SEGMENT_TABLE_NAME = secrets["DDB_TEST_SEGMENT_TABLE_NAME"]
 
     HERE_PUBLIC_KEY = secrets['HERE_PUBLIC_KEY']
-    MAPBOX_PUBLIC_KEY = secrets['HERE_PUBLIC_KEY']
+    MAPBOX_PUBLIC_KEY = secrets['MAPBOX_PUBLIC_KEY']
 else:
     # Read Local Config
     config = configparser.ConfigParser()
