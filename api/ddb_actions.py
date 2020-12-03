@@ -24,6 +24,10 @@ def _get_ddb():
 
 
 def _get_route_table(reset_table=False):
+	"""
+	Initialize the routing table if does not exist
+	otherwise return table with required attributes
+	"""
     global _ROUTE_TABLE
     if not _ROUTE_TABLE or reset_table:
         try:
