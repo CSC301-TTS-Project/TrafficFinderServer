@@ -14,6 +14,7 @@ _SEQUENCE_TABLE = None
 
 
 def _get_ddb():
+<<<<<<< Updated upstream
 	"""
 	Get the DynamoDB table from the Database endpoint
 	"""
@@ -64,6 +65,56 @@ def _get_route_table(reset_table=False):
 		finally:
 			_ROUTE_TABLE = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
 			_ROUTE_TABLE.wait_until_exists()
+=======
+    """Get the DynamoDB table from the Database endpoint"""
+    global _DDB
+    if not _DDB:
+        _DDB = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
+    return _DDB
+
+
+def _get_route_table(reset_table=False):
+    """
+    Initialize the routing table if does not exist
+    otherwise return table with required attributes
+    """
+    global _ROUTE_TABLE
+    if not _ROUTE_TABLE or reset_table:
+        try:
+            _get_ddb().create_table(
+                AttributeDefinitions=[
+                    {
+                        'AttributeName': 'UserId',
+                        'AttributeType': 'S',
+                    },
+                    {
+                        'AttributeName': 'Route',
+                        'AttributeType': 'N',
+                    }
+                ],
+                KeySchema=[
+                    {
+                        'AttributeName': 'UserId',
+                        'KeyType': 'HASH',
+                    },
+                    {
+                        'AttributeName': 'Route',
+                        'KeyType': 'RANGE',
+                    }
+                ],
+                ProvisionedThroughput={
+                    'ReadCapacityUnits': 5,
+                    'WriteCapacityUnits': 5,
+                },
+                TableName=_DDB_ROUTE_TABLE_NAME,
+            )
+        except _get_ddb().meta.client.exceptions.ResourceInUseException:
+            # table has already been created
+            pass
+        finally:
+            _ROUTE_TABLE = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
+            _ROUTE_TABLE.wait_until_exists()
+>>>>>>> Stashed changes
 
 			# initialize default route; implementation will change for
 			# deliverable 3
@@ -135,6 +186,7 @@ def get_route_segments(segment_ids):
 	# make sure table is active
 	_get_segment_table()
 
+<<<<<<< Updated upstream
 	# batch_get_items doesn't guarantee order. Index segments to a dict first
 	segments = {}
 	unprocessed_keys = copy.deepcopy(segment_ids)
@@ -195,6 +247,68 @@ def update_route_segment(user_id, route, index, segment):
 	@param segment: the segment to insert
 	"""
 	new_segment_id = str(uuid.uuid4())
+=======
+    # batch_get_items doesn't guarantee order. Index segments to a dict first
+    segments = {}
+    unprocessed_keys = copy.deepcopy(segment_ids)
+    while len(unprocessed_keys) > 0:
+        response = _get_ddb().batch_get_item(
+            RequestItems={
+                _DDB_SEGMENT_TABLE_NAME: {
+                    'Keys': [{'SegmentId': key} for key in unprocessed_keys],
+                    'ConsistentRead': True
+                }
+            }
+        )
+        unprocessed_keys.clear()
+        if len(response["UnprocessedKeys"]) > 0:
+            unprocessed_keys.append(
+                [x['S']
+                    for x in response["UnprocessedKeys"]
+                    [_DDB_SEGMENT_TABLE_NAME]["Keys"]])
+        for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
+            segments[item["SegmentId"]] = pickle.loads(item["Segment"].value)
+    return [segments[segment_id] for segment_id in segment_ids]
+
+
+def insert_route_segment(user_id, route, index, segment):
+    """
+    Add a new segment to the given route
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @param index: index of the segment in route
+    @param segment: the segment to insert
+    """
+    new_segment_id = str(uuid.uuid4())
+    _get_segment_table().put_item(
+        Item={
+            'SegmentId': new_segment_id,
+            'Segment': pickle.dumps(segment)
+        }
+    )
+    new_segment_list = get_route_segment_ids(user_id, route)
+    new_segment_list.insert(index, new_segment_id)
+    _get_route_table().update_item(
+        Key={
+            'UserId': user_id,
+            'Route': route
+        },
+        AttributeUpdates={
+            'SegmentIds': {'Value': new_segment_list}
+        }
+    )
+
+
+def update_route_segment(user_id, route, index, segment):
+    """
+    Update a segment in the given route
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @param index: index of the segment in route
+    @param segment: the segment to insert
+    """
+    new_segment_id = str(uuid.uuid4())
+>>>>>>> Stashed changes
 
 	_get_segment_table().put_item(
 		Item={
@@ -225,6 +339,7 @@ def update_route_segment(user_id, route, index, segment):
 
 
 def delete_route_segment(user_id, route, index):
+<<<<<<< Updated upstream
 	"""
 	Delete a segment from the given route
 	@param user_id: user id of the passed route
@@ -233,6 +348,16 @@ def delete_route_segment(user_id, route, index):
 	"""
 	segment_list = get_route_segment_ids(user_id, route)
 	segment_id_to_remove = segment_list.pop(index)
+=======
+    """
+    Delete a segment from the given route
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @param index: index of the segment in route
+    """
+    segment_list = get_route_segment_ids(user_id, route)
+    segment_id_to_remove = segment_list.pop(index)
+>>>>>>> Stashed changes
 
 	_get_segment_table().delete_item(
 		Key={
@@ -252,8 +377,16 @@ def delete_route_segment(user_id, route, index):
 
 
 def reset():
+<<<<<<< Updated upstream
 	"""
 	Reset Segment and route table
 	"""
 	_get_segment_table(reset_table=True)
 	_get_route_table(reset_table=True)
+=======
+    """
+    Reset Segment and route table
+    """
+    _get_segment_table(reset_table=True)
+    _get_route_table(reset_table=True)
+>>>>>>> Stashed changes
