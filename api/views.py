@@ -236,10 +236,12 @@ def get_traffic_data(request):
             [seg.link_dirs for seg in route_segments]))
         if len(links_dirs_list) <= 0:
             return HttpResponse("No route data to fetch.")
+        log.debug(links_dirs_list)
 
         route_here_data = TravelTime.get_data_for_route(
             links_dirs_list, date_range, days_of_week,
             hour_range)
+        log.debug(route_here_data)
 
         response_csv = ",".join(route_here_data[0].keys())
         response_csv += '\n'

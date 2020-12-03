@@ -137,6 +137,7 @@ else:
     DDB_ROUTE_TABLE_NAME = config['DYNAMO_DB']['DDB_ROUTE_TABLE_NAME']
     DDB_SEGMENT_TABLE_NAME = config['DYNAMO_DB']['DDB_SEGMENT_TABLE_NAME']
 
+    # TODO: REMOVE COMMENTS BELOW
     # HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['HERE_PUBLIC_KEY']])
     # MAPBOX_PUBLIC_KEY = str(
     #     os.environ[config['API_KEYS']['MAPBOX_PUBLIC_KEY']])
@@ -171,3 +172,12 @@ USE_L10N = True
 USE_TZ = False
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    }
