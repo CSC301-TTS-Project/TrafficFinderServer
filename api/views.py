@@ -232,11 +232,11 @@ def get_traffic_data(request):
         hour_range = [int(hr) for hr in json_data["hour_range"]]
         selections = [int(select) for select in json_data["selections"]]
 
-        wanted_data = {}
+        wanted_data = []
 
         for i in range(len(selections)):
             if selections[i]:
-                wanted_data.add(COLUMN_NAMES[i])
+                wanted_data.append(COLUMN_NAMES[i])
 
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
@@ -250,17 +250,12 @@ def get_traffic_data(request):
             links_dirs_list, date_range, days_of_week,
             hour_range)
 
-        for i, key in enumerate(route_here_data[0].keys()):
-            if selections[i]:
-                wanted_data.add(key)
         response_csv = ",".join(wanted_data) + "\n"
 
         for record in route_here_data:
             wanted_vals = []
-            keys = record.keys()
-            for key in keys:
-                if key in wanted_data:
-                    wanted_vals.append(record[key])
+            for key in wanted_data:
+                wanted_vals.append(record[key])
             response_csv += ",".join([str(val) for val in wanted_vals])
             response_csv += '\n'
 
