@@ -226,8 +226,5 @@ def get_traffic_data(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-def get_csv_values(request):
-
-
 def get_api_keys(request):
     return JsonResponse(api_keys_dict(), safe=False)
