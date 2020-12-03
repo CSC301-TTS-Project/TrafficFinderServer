@@ -227,7 +227,7 @@ def get_traffic_data(request):
 
 
 def get_csv_values(request):
-    log.debug("Received [POST] getTrafficData")
+    log.debug("Received[POST] getTrafficData
 
 
 def get_api_keys(request):
