@@ -9,6 +9,7 @@ from api.models import Node, Segment, TravelTime
 import logging
 from .api_keys import api_keys_dict
 import traceback
+from time import time
 
 # Set this in config, should be set using auth header later
 USER = settings.DEFAULT_DDB_USER_ID
@@ -236,18 +237,17 @@ def get_traffic_data(request):
             [seg.link_dirs for seg in route_segments]))
         if len(links_dirs_list) <= 0:
             return HttpResponse("No route data to fetch.")
-        log.debug(links_dirs_list)
 
         route_here_data = TravelTime.get_data_for_route(
             links_dirs_list, date_range, days_of_week,
             hour_range)
-        log.debug(route_here_data)
+
         wanted_data = []
         for i, key in enumerate(route_here_data[0].keys()):
             if selections[i]:
-                wanted_data.append(key)
-        response_csv = ",".join(wanted_data)
-        response_csv += '\n'
+                wanted_data.add(key)
+        response_csv = ",".join(wanted_data) + "\n"
+
         for record in route_here_data:
             wanted_vals = []
             keys = record.keys()
