@@ -237,8 +237,6 @@ def get_csv_values(request):
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
 
-        links_dirs_list = list(itertools.chain.from_iterable(
-
 
 def get_api_keys(request):
     return JsonResponse(api_keys_dict(), safe=False)
