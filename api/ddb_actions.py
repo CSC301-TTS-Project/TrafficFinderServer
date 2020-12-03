@@ -14,7 +14,7 @@ _SEQUENCE_TABLE = None
 
 
 def _get_ddb():
-    """Get the DynamoDB table from the Database endpoint"""
+	"""Get the DynamoDB table from the Database endpoint"""
     global _DDB
     if not _DDB:
         _DDB = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
@@ -22,7 +22,7 @@ def _get_ddb():
 
 
 def _get_route_table(reset_table=False):
-    """
+	"""
     Initialize the routing table if does not exist
     otherwise return table with required attributes
     """
@@ -72,7 +72,7 @@ def _get_route_table(reset_table=False):
                     "SegmentIds": []
                 }
             )
-        return _ROUTE_TABLE
+    return _ROUTE_TABLE
 
 
 def _get_segment_table(reset_table=False):
@@ -125,13 +125,14 @@ def get_route_segment_ids(user_id, route):
 
 def get_route_segments(segment_ids):
     """
-        Get an ordered list of segments given a list of segment ids
-        @param segment_ids: a list of segment ids
-        @return: ordered list of segments
+    Get an ordered list of segments given a list of segment ids
+    @param segment_ids: a list of segment ids
+    @return: ordered list of segments
         (each segment starts and ends with nodes that define the endpoints of the segment)
     """
     # make sure table is active
     _get_segment_table()
+
     # batch_get_items doesn't guarantee order. Index segments to a dict first
     segments = {}
     unprocessed_keys = copy.deepcopy(segment_ids)
@@ -148,15 +149,15 @@ def get_route_segments(segment_ids):
         if len(response["UnprocessedKeys"]) > 0:
             unprocessed_keys.append(
                 [x['S']
-                    for x in response["UnprocessedKeys"]
-                    [_DDB_SEGMENT_TABLE_NAME]["Keys"]])
+                 for x in response["UnprocessedKeys"]
+                 [_DDB_SEGMENT_TABLE_NAME]["Keys"]])
         for item in response["Responses"][_DDB_SEGMENT_TABLE_NAME]:
             segments[item["SegmentId"]] = pickle.loads(item["Segment"].value)
     return [segments[segment_id] for segment_id in segment_ids]
 
 
 def insert_route_segment(user_id, route, index, segment):
-    """
+	"""
     Add a new segment to the given route
     @param user_id: user id of the passed route
     @param route: id of the route
@@ -184,7 +185,7 @@ def insert_route_segment(user_id, route, index, segment):
 
 
 def update_route_segment(user_id, route, index, segment):
-    """
+	"""
     Update a segment in the given route
     @param user_id: user id of the passed route
     @param route: id of the route
@@ -222,7 +223,7 @@ def update_route_segment(user_id, route, index, segment):
 
 
 def delete_route_segment(user_id, route, index):
-    """
+	"""
     Delete a segment from the given route
     @param user_id: user id of the passed route
     @param route: id of the route
@@ -249,7 +250,7 @@ def delete_route_segment(user_id, route, index):
 
 
 def reset():
-    """
+	"""
     Reset Segment and route table
     """
     _get_segment_table(reset_table=True)
