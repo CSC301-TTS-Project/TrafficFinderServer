@@ -15,6 +15,8 @@ from time import time
 USER = settings.DEFAULT_DDB_USER_ID
 
 log = logging.getLogger(__name__)
+COLUMN_NAMES = "hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed,full_link_obs".split(
+    ",")
 
 
 def index(request):
@@ -230,6 +232,12 @@ def get_traffic_data(request):
         hour_range = [int(hr) for hr in json_data["hour_range"]]
         selections = [int(select) for select in json_data["selections"]]
 
+        wanted_data = {}
+
+        for i in range(len(selections)):
+            if selections[i]:
+                wanted_data.add(COLUMN_NAMES[i])
+
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
 
@@ -242,7 +250,6 @@ def get_traffic_data(request):
             links_dirs_list, date_range, days_of_week,
             hour_range)
 
-        wanted_data = []
         for i, key in enumerate(route_here_data[0].keys()):
             if selections[i]:
                 wanted_data.add(key)
@@ -256,7 +263,9 @@ def get_traffic_data(request):
                     wanted_vals.append(record[key])
             response_csv += ",".join([str(val) for val in wanted_vals])
             response_csv += '\n'
+
         return HttpResponse(response_csv, content_type='text/csv')
+
     except KeyError as e:
         log.error(
             f"Got the following error during getTrafficData: {traceback.format_exc()}")
