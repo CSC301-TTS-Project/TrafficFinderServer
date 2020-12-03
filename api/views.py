@@ -231,7 +231,6 @@ def get_csv_values(request):
     try:
         json_data = json.loads(request.body)
         route = int(json_data["route"])
-        date_range = json_data["date_range"]
 
 
 def get_api_keys(request):
