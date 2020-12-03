@@ -187,6 +187,13 @@ def insert_route_segment(user_id, route, index, segment):
 
 
 def update_route_segment(user_id, route, index, segment):
+	"""
+	Update a segment in the given route
+	@param user_id: user id of the passed route
+    @param route: id of the route
+	@param index: index of the segment in route
+	@param segment: the segment to insert
+	"""
     new_segment_id = str(uuid.uuid4())
 
     _get_segment_table().put_item(
@@ -218,6 +225,12 @@ def update_route_segment(user_id, route, index, segment):
 
 
 def delete_route_segment(user_id, route, index):
+	"""
+	Delete a segment from the given route
+	@param user_id: user id of the passed route
+    @param route: id of the route
+	@param index: index of the segment in route
+	"""
     segment_list = get_route_segment_ids(user_id, route)
     segment_id_to_remove = segment_list.pop(index)
 
