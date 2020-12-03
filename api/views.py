@@ -242,8 +242,6 @@ def get_csv_values(request):
         if len(links_dirs_list) <= 0:
             return HttpResponse("No route data to fetch.")
 
-        route_here_data = TravelTime.get_data_for_route(
-
 
 def get_api_keys(request):
     return JsonResponse(api_keys_dict(), safe=False)
