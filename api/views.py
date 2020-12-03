@@ -44,7 +44,7 @@ def insert_node(request):
         route: The index of the route to insert into
         lat: The latitude of the endpoint of new segment
         lng: The longitude of the endpoint of new segment
-        segment_idx: The segment ID of the new segment to be created     
+        index: The segment ID of the new segment to be created     
     """
     try:
         log.debug("Received [POST] insert_node")
@@ -100,7 +100,7 @@ def modify_node(request):
         route: The index of the route to modify
         lat: The latitude of the endpoint of edited segment
         lng: The longitude of the endpoint of edited segment
-        segment_idx: The segment ID of the segment to be edited     
+        index: The segment ID of the segment to be edited     
     """
     try:
         log.debug("Received [POST] modify_node")
@@ -152,6 +152,13 @@ def modify_node(request):
 
 
 def delete_node(request):
+    """
+    Delete segment in a route
+
+    This expects a json body with the following parameters:
+        route: The index of the route to edited
+        index: The segment ID of the segment to be deleted     
+    """
     try:
         log.debug("Received [DELETE] delete_node")
         json_data = json.loads(request.body)
