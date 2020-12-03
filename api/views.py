@@ -249,8 +249,6 @@ def get_csv_values(request):
         response_csv = ",".join(route_here_data[0].keys())
         response_csv += '\n'
         for record in route_here_data:
-            response_csv += ",".join([str(val) for val in record.values()])
-            response_csv += '\n'
 
 
 def get_api_keys(request):
