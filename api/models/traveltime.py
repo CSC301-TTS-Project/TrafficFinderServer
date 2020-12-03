@@ -121,35 +121,37 @@ class TravelTime(models.Model):
 
         # For whatever reason, the values length values in our DB aren't
         # correct. Recalculate them and related values.
-        with connection.cursor() as cursor:
-            # qs = ','.join('%s' for _ in range(len(link_dirs)))
-            # cursor.execute(
-            #     f"SELECT DISTINCT travel_time.link_dir, length "
-            #     f"FROM travel_time WHERE travel_time.link_dir in ({qs})",
-            #     link_dirs)
-            # lengths = cursor.fetchall()
+        # with connection.cursor() as cursor:
+        #     qs = ','.join('%s' for _ in range(len(link_dirs)))
+        #     cursor.execute(
+        #         f"SELECT DISTINCT travel_time.link_dir, length "
+        #         f"FROM travel_time WHERE travel_time.link_dir in ({qs})",
+        #         link_dirs)
+        #     lengths = cursor.fetchall()
 
-            # total_length = 0
-            # for l in lengths:
-            #     total_length += l[1]
-            total_length = 1
-            hourly = hourly.annotate(total_length=models.Sum("length")) \
-                .annotate(mean_speed=models.Avg('mean')) \
-                .annotate(std_dev_speed=models.StdDev('mean')) \
-                .annotate(mean_tt=((total_length / 1000) / models.Avg('mean')) * 3600) \
-                .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
-                .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
-                                                        function="percentile_cont",
-                                                        template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
-                .annotate(pct_95_speed=models.Aggregate(models.F("mean"),
-                                                        function="percentile_cont",
-                                                        template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)")) \
-                .annotate(min_speed=models.Min('mean')) \
-                .annotate(max_speed=models.Max('mean'))
-            hourly = hourly.annotate(
-                full_link_obs=models.Value(
-                    ((int((end_time - start_time).seconds) // 60) / 5) *
-                    len(link_dirs),
-                    models.IntegerField()))
+        #     total_length = 0
+        #     for l in lengths:
+        #         total_length += l[1]
+
+        total_length = 1
+
+        hourly = hourly.annotate(total_length=models.F('length')) \
+            .annotate(mean_speed=models.Avg('mean')) \
+            .annotate(std_dev_speed=models.StdDev('mean')) \
+            .annotate(mean_tt=((total_length / 1000) / models.Avg('mean')) * 3600) \
+            .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
+            .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
+                                                    function="percentile_cont",
+                                                    template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
+            .annotate(pct_95_speed=models.Aggregate(models.F("mean"),
+                                                    function="percentile_cont",
+                                                    template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)")) \
+            .annotate(min_speed=models.Min('mean')) \
+            .annotate(max_speed=models.Max('mean'))
+        hourly = hourly.annotate(
+            full_link_obs=models.Value(
+                ((int((end_time - start_time).seconds) // 60) / 5) *
+                len(link_dirs),
+                models.IntegerField()))
 
         return hourly
