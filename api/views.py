@@ -243,8 +243,6 @@ def get_csv_values(request):
             return HttpResponse("No route data to fetch.")
 
         route_here_data = TravelTime.get_data_for_route(
-            links_dirs_list, date_range, days_of_week,
-            hour_range)
 
 
 def get_api_keys(request):
