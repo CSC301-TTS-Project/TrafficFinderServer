@@ -232,8 +232,6 @@ def get_csv_values(request):
         json_data = json.loads(request.body)
         route = int(json_data["route"])
         date_range = json_data["date_range"]
-        days_of_week = [int(day) for day in json_data["days_of_week"]]
-        hour_range = [int(hr) for hr in json_data["hour_range"]]
 
 
 def get_api_keys(request):
