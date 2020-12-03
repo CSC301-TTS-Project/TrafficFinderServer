@@ -252,5 +252,8 @@ def delete_route_segment(user_id, route, index):
 
 
 def reset():
+	"""
+	Reset Segment and route table
+	"""
     _get_segment_table(reset_table=True)
     _get_route_table(reset_table=True)
