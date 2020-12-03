@@ -37,6 +37,15 @@ def get_route(request):
 
 
 def insert_node(request):
+    """
+    Insert segment into a route
+
+    This expects a json body with the following parameters:
+        route: The index of the route to insert into
+        lat: The latitude of the endpoint of new segment
+        lng: The longitude of the endpoint of new segment
+        segment_idx: The segment ID of the new segment to be created 
+    """
     try:
         log.debug("Received [POST] insert_node")
         json_data = json.loads(request.body)
