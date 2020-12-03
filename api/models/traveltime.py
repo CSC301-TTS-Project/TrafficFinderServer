@@ -118,3 +118,18 @@ class TravelTime(models.Model):
             .extra({"route_num": 1}) \
             .values('route_num') \
             .annotate(link_obs=models.Count(1))
+
+        # For whatever reason, the values length values in our DB aren't
+        # correct. Recalculate them and related values.
+        with connection.cursor() as cursor:
+            qs = ','.join('%s' for _ in range(len(link_dirs)))
+            cursor.execute(
+                f"SELECT SUM(length) "
+                f"FROM "
+                f"(SELECT DISTINCT links.link_dir, ST_Length(ST_Transform(links.wkb_geometry, 2952)) "
+                f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
+                link_dirs)
+            total_length = cursor.fetchone()[0]
+            hourly =
+
+        return hourly
