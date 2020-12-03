@@ -240,11 +240,19 @@ def get_traffic_data(request):
         route_here_data = TravelTime.get_data_for_route(
             links_dirs_list, date_range, days_of_week,
             hour_range)
-
-        response_csv = ",".join(route_here_data[0].keys())
+        wanted_data = []
+        for i, key in enumerate(route_here_data[0].keys()):
+            if selections[i]:
+                wanted_data.append(key)
+        response_csv = ",".join(wanted_data)
         response_csv += '\n'
         for record in route_here_data:
-            response_csv += ",".join([str(val) for val in record.values()])
+            wanted_vals = []
+            keys = record.keys()
+            for key in keys:
+                if key in wanted_data:
+                    wanted_vals.append(record[key])
+            response_csv += ",".join([str(val) for val in wanted_vals])
             response_csv += '\n'
         return HttpResponse(response_csv, content_type='text/csv')
     except KeyError as e:
