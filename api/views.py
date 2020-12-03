@@ -228,9 +228,6 @@ def get_traffic_data(request):
 
 def get_csv_values(request):
     log.debug("Received [POST] getTrafficData")
-    try:
-        json_data = json.loads(request.body)
-        route = int(json_data["route"])
 
 
 def get_api_keys(request):
