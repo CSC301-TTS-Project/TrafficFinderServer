@@ -239,8 +239,6 @@ def get_csv_values(request):
 
         links_dirs_list = list(itertools.chain.from_iterable(
             [seg.link_dirs for seg in route_segments]))
-        if len(links_dirs_list) <= 0:
-            return HttpResponse("No route data to fetch.")
 
 
 def get_api_keys(request):
