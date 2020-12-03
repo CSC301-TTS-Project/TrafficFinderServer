@@ -246,8 +246,6 @@ def get_csv_values(request):
             links_dirs_list, date_range, days_of_week,
             hour_range)
 
-        response_csv = ",".join(route_here_data[0].keys())
-
 
 def get_api_keys(request):
     return JsonResponse(api_keys_dict(), safe=False)
