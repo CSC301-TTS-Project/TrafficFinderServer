@@ -253,10 +253,7 @@ def get_csv_values(request):
             response_csv += '\n'
         return HttpResponse(response_csv, content_type='text/csv')
     except KeyError as e:
-        log.error(
-            f"Got the following error during getTrafficData: {traceback.format_exc()}")
-        return HttpResponseBadRequest("Malformed Input")
+
 
 def get_api_keys(request):
     return JsonResponse(api_keys_dict(), safe=False)
-
