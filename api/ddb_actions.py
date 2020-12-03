@@ -14,6 +14,7 @@ _SEQUENCE_TABLE = None
 
 
 def _get_ddb():
+    """Get the DynamoDB table from the Database endpoint"""
     global _DDB
     if not _DDB:
         _DDB = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
@@ -21,6 +22,10 @@ def _get_ddb():
 
 
 def _get_route_table(reset_table=False):
+    """
+    Initialize the routing table if does not exist
+    otherwise return table with required attributes
+    """
     global _ROUTE_TABLE
     if not _ROUTE_TABLE or reset_table:
         try:
@@ -152,6 +157,13 @@ def get_route_segments(segment_ids):
 
 
 def insert_route_segment(user_id, route, index, segment):
+    """
+    Add a new segment to the given route
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @param index: index of the segment in route
+    @param segment: the segment to insert
+    """
     new_segment_id = str(uuid.uuid4())
     _get_segment_table().put_item(
         Item={
@@ -173,6 +185,13 @@ def insert_route_segment(user_id, route, index, segment):
 
 
 def update_route_segment(user_id, route, index, segment):
+    """
+    Update a segment in the given route
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @param index: index of the segment in route
+    @param segment: the segment to insert
+    """
     new_segment_id = str(uuid.uuid4())
 
     _get_segment_table().put_item(
@@ -204,6 +223,12 @@ def update_route_segment(user_id, route, index, segment):
 
 
 def delete_route_segment(user_id, route, index):
+    """
+    Delete a segment from the given route
+    @param user_id: user id of the passed route
+    @param route: id of the route
+    @param index: index of the segment in route
+    """
     segment_list = get_route_segment_ids(user_id, route)
     segment_id_to_remove = segment_list.pop(index)
 
@@ -225,5 +250,8 @@ def delete_route_segment(user_id, route, index):
 
 
 def reset():
+    """
+    Reset Segment and route table
+    """
     _get_segment_table(reset_table=True)
     _get_route_table(reset_table=True)

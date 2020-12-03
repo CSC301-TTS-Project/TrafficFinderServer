@@ -5,6 +5,9 @@ from django.db import connection
 class LinkManager(models.Manager):
 
     def shortest_route_links(self, start, end):
+        """
+        Return the list corresponding to the shortest route (with Dijkstra) using PSQL query. 
+        """
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, link_dir, link_id, st_name, source, target, wkb_geometry "

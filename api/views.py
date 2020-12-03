@@ -9,11 +9,14 @@ from api.models import Node, Segment, TravelTime
 import logging
 from .api_keys import api_keys_dict
 import traceback
+from time import time
 
 # Set this in config, should be set using auth header later
 USER = settings.DEFAULT_DDB_USER_ID
 
 log = logging.getLogger(__name__)
+COLUMN_NAMES = "hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed,full_link_obs".split(
+    ",")
 
 
 def index(request):
@@ -37,6 +40,15 @@ def get_route(request):
 
 
 def insert_node(request):
+    """
+    Insert segment into a route
+
+    This expects a json body with the following parameters:
+        route: The index of the route to insert into
+        lat: The latitude of the endpoint of new segment
+        lng: The longitude of the endpoint of new segment
+        index: The segment ID of the new segment to be created     
+    """
     try:
         log.debug("Received [POST] insert_node")
         json_data = json.loads(request.body)
@@ -84,6 +96,15 @@ def insert_node(request):
 
 
 def modify_node(request):
+    """
+    Modify segment in a route
+
+    This expects a json body with the following parameters:
+        route: The index of the route to modify
+        lat: The latitude of the endpoint of edited segment
+        lng: The longitude of the endpoint of edited segment
+        index: The segment ID of the segment to be edited     
+    """
     try:
         log.debug("Received [POST] modify_node")
         json_data = json.loads(request.body)
@@ -134,6 +155,13 @@ def modify_node(request):
 
 
 def delete_node(request):
+    """
+    Delete segment in a route
+
+    This expects a json body with the following parameters:
+        route: The index of the route to edited
+        index: The segment ID of the segment to be deleted     
+    """
     try:
         log.debug("Received [DELETE] delete_node")
         json_data = json.loads(request.body)
@@ -202,6 +230,14 @@ def get_traffic_data(request):
         date_range = json_data["date_range"]
         days_of_week = [int(day) for day in json_data["days_of_week"]]
         hour_range = [int(hr) for hr in json_data["hour_range"]]
+        selections = [int(select) for select in json_data["selections"]]
+
+        wanted_data = []
+
+        for i in range(len(selections)):
+            if selections[i]:
+                wanted_data.append(COLUMN_NAMES[i])
+
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
 
@@ -214,12 +250,17 @@ def get_traffic_data(request):
             links_dirs_list, date_range, days_of_week,
             hour_range)
 
-        response_csv = ",".join(route_here_data[0].keys())
-        response_csv += '\n'
+        response_csv = ",".join(wanted_data) + "\n"
+
         for record in route_here_data:
-            response_csv += ",".join([str(val) for val in record.values()])
+            wanted_vals = []
+            for key in wanted_data:
+                wanted_vals.append(record[key])
+            response_csv += ",".join([str(val) for val in wanted_vals])
             response_csv += '\n'
+
         return HttpResponse(response_csv, content_type='text/csv')
+
     except KeyError as e:
         log.error(
             f"Got the following error during getTrafficData: {traceback.format_exc()}")
