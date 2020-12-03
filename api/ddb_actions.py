@@ -14,6 +14,9 @@ _SEQUENCE_TABLE = None
 
 
 def _get_ddb():
+	"""
+	Get the DynamoDB table from the Database endpoint
+	"""
     global _DDB
     if not _DDB:
         _DDB = boto3.resource('dynamodb', endpoint_url=settings.DDB_ENDPOINT)
