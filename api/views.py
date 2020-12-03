@@ -247,8 +247,6 @@ def get_csv_values(request):
             hour_range)
 
         response_csv = ",".join(route_here_data[0].keys())
-        response_csv += '\n'
-        for record in route_here_data:
 
 
 def get_api_keys(request):
