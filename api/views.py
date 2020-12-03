@@ -234,8 +234,6 @@ def get_csv_values(request):
         date_range = json_data["date_range"]
         days_of_week = [int(day) for day in json_data["days_of_week"]]
         hour_range = [int(hr) for hr in json_data["hour_range"]]
-        route_segment_ids = get_route_segment_ids(USER, route)
-        route_segments = get_route_segments(route_segment_ids)
 
 
 def get_api_keys(request):
