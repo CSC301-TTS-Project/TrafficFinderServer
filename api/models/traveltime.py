@@ -109,3 +109,12 @@ class TravelTime(models.Model):
             f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
         end_time = datetime.strptime(
             f'{date_range[1]} {hour_range[1]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
+
+        hourly = TravelTime.objects \
+            .filter(link_dir__in=link_dirs) \
+            .filter(tx__range=[start_time, end_time]) \
+            .filter(tx__hour__range=hour_range) \
+            .filter(tx__iso_week_day__in=days_of_week) \
+            .extra({"route_num": 1}) \
+            .values('route_num') \
+            .annotate(link_obs=models.Count(1))
