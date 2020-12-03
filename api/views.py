@@ -15,7 +15,7 @@ from time import time
 USER = settings.DEFAULT_DDB_USER_ID
 
 log = logging.getLogger(__name__)
-COLUMN_NAMES = "route_num,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed,full_link_obs".split(
+COLUMN_NAMES = "link_dir,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed,full_link_obs".split(
     ",")
 
 

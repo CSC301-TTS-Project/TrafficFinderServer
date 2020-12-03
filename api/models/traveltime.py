@@ -1,3 +1,4 @@
+from botocore.compat import total_seconds
 from django.db import models
 from datetime import datetime
 from django.db import connection
@@ -115,22 +116,24 @@ class TravelTime(models.Model):
             .filter(tx__range=[start_time, end_time]) \
             .filter(tx__hour__range=hour_range) \
             .filter(tx__iso_week_day__in=days_of_week) \
-            .extra({"route_num": 1}) \
-            .values('route_num') \
+            .values('link_dir') \
             .annotate(link_obs=models.Count(1))
 
         # For whatever reason, the values length values in our DB aren't
         # correct. Recalculate them and related values.
         with connection.cursor() as cursor:
-            qs = ','.join('%s' for _ in range(len(link_dirs)))
-            cursor.execute(
-                f"SELECT SUM(length) "
-                f"FROM "
-                f"(SELECT DISTINCT links.link_dir, ST_Length(ST_Transform(links.wkb_geometry, 2952)) "
-                f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
-                link_dirs)
-            total_length = cursor.fetchone()[0]
-            hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
+            # qs = ','.join('%s' for _ in range(len(link_dirs)))
+            # cursor.execute(
+            #     f"SELECT DISTINCT travel_time.link_dir, length "
+            #     f"FROM travel_time WHERE travel_time.link_dir in ({qs})",
+            #     link_dirs)
+            # lengths = cursor.fetchall()
+
+            # total_length = 0
+            # for l in lengths:
+            #     total_length += l[1]
+            total_length = 1
+            hourly = hourly.annotate(total_length=models.Sum("length")) \
                 .annotate(mean_speed=models.Avg('mean')) \
                 .annotate(std_dev_speed=models.StdDev('mean')) \
                 .annotate(mean_tt=((total_length / 1000) / models.Avg('mean')) * 3600) \
