@@ -251,8 +251,6 @@ def get_csv_values(request):
         for record in route_here_data:
             response_csv += ",".join([str(val) for val in record.values()])
             response_csv += '\n'
-        return HttpResponse(response_csv, content_type='text/csv')
-    except KeyError as e:
 
 
 def get_api_keys(request):
