@@ -159,6 +159,13 @@ def get_route_segments(segment_ids):
 
 
 def insert_route_segment(user_id, route, index, segment):
+	"""
+	Add a new segment to the given route
+	@param user_id: user id of the passed route
+    @param route: id of the route
+	@param index: index of the segment in route
+	@param segment: the segment to insert
+	"""
     new_segment_id = str(uuid.uuid4())
     _get_segment_table().put_item(
         Item={
