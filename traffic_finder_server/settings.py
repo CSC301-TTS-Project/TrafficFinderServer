@@ -186,4 +186,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'filters': ['require_debug_true'],
         },
-    }
+    },
+    'loggers': {
+        'mylogger': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+    },
+}
