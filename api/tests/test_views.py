@@ -114,7 +114,7 @@ class ViewTest(TestCase):
             path='/api/getTrafficData',
             data=json.dumps(
                 {
-                    'selections': [1, 1, 1, 1, 1, 1, ],
+                    'selections': [1, 1, 1, 1, 1, 1, 1],
                     'route': 0,
                     'date_range': [
                         "2018-09-01",
