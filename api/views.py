@@ -238,7 +238,6 @@ def get_csv_values(request):
         route_segments = get_route_segments(route_segment_ids)
 
         links_dirs_list = list(itertools.chain.from_iterable(
-            [seg.link_dirs for seg in route_segments]))
 
 
 def get_api_keys(request):
