@@ -32,7 +32,7 @@ class TravelTime(models.Model):
         }
 
     @staticmethod
-    def get_data_for_route(link_dirs, date_range, days_of_week, hour_range):
+    def get_data_for_route_hourly(link_dirs, date_range, days_of_week, hour_range):
         """
 
         Return hourly aggregated data for the passed links.
@@ -90,3 +90,22 @@ class TravelTime(models.Model):
                     models.IntegerField()))
 
         return hourly
+
+    @staticmethod
+    def get_data_for_route(link_dirs, date_range, days_of_week, hour_range):
+        """
+
+        Return aggregated data for the passed links.
+
+        @param link_dirs: A list of link_dirs to include in the aggregation
+        @param date_range: String tuple corresponding to the date range e.g. ("2018-09-01", "2018-09-02")
+        @param days_of_week: Tuple representing days of week to include in aggregation, e.g. [0, 1, 2] corresponds to sunday, monday, tuesday
+        @param hour_range: An hourly range, e.g. [7, 13] for 7AM to 1PM
+
+        @precondition: link_dirs has at least one link.
+        """
+
+        start_time = datetime.strptime(
+            f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
+        end_time = datetime.strptime(
+            f'{date_range[1]} {hour_range[1]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
