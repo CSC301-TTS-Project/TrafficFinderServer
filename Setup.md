@@ -13,6 +13,6 @@
 
 5. Do django migrations: `python3 manage.py makemigrations & & python3 manage.py migrate`
 
-6. Run tests: `python manage.py test - -keepdb - -nologcapture`
+6. Run tests: `python manage.py test --keepdb --nologcapture`
 
 7. Run backend: `python manage.py runserver`
