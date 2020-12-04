@@ -177,8 +177,10 @@ class TravelTime(models.Model):
                 if entry['link_dir'] in cursor_query:
                     travel_times.append(
                         cursor_query[entry['link_dir']] / entry['mean_speed'])
-                    perc_85.append(entry['pct_85_speed'])
-                    perc_95.append(entry['pct_95_speed'])
+                    perc_85.append(
+                        cursor_query[entry['link_dir']] / entry['pct_85_speed'])
+                    perc_95.append(
+                        cursor_query[entry['link_dir']] / entry['pct_95_speed'])
                 std_tt.append(entry['std_dev_tt'])
                 min_speeds.append(entry['min_speed'])
                 max_speeds.append(entry['max_speed'])
