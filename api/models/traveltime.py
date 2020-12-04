@@ -185,18 +185,16 @@ class TravelTime(models.Model):
                         cursor_query[entry['link_dir']] / entry['min_speed'])
                     max_speeds.append(
                         cursor_query[entry['link_dir']] / entry['max_speed'])
-                std_tt.append(entry['std_dev_tt'])
+                    std_tt.append(entry['std_dev_tt'] * cursor_query[entry['link_dir']])
+                    std_speed.append(entry['std_dev_speed'] * cursor_query[entry['link_dir']])
                 link_obs.append(entry['link_obs'])
-                std_speed.append(entry['std_dev_speed'])
 
-            length = len(travel_times)
-            tt_mean = sum(travel_times) / \
-                length * 3600
+            tt_mean = sum(travel_times) / len(travel_times) * 3600
             harmonic_mean = total_length / sum(travel_times)
             harmonic_std_speed = total_length / sum(std_speed)
-            harmonic_std_tt = sum(std_tt) / length
-            harmonic_perc_85 = sum(perc_85)/length
-            harmonic_perc_95 = sum(perc_95)/length
+            harmonic_std_tt = sum(std_tt) / total_length
+            harmonic_perc_85 = total_length / sum(perc_85)
+            harmonic_perc_95 = total_length / sum(perc_95)
             harmonic_min = sum(min_speeds)/length
             harmonic_max = sum(max_speeds)/length
             link_obs_val = sum(link_obs)
