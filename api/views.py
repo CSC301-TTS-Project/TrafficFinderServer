@@ -9,6 +9,7 @@ from api.models import Node, Segment, TravelTime
 import logging
 from .api_keys import api_keys_dict
 import traceback
+from django.db import connection
 from time import time
 
 # Set this in config, should be set using auth header later
@@ -47,7 +48,7 @@ def insert_node(request):
         route: The index of the route to insert into
         lat: The latitude of the endpoint of new segment
         lng: The longitude of the endpoint of new segment
-        index: The segment ID of the new segment to be created     
+        index: The segment ID of the new segment to be created
     """
     try:
         log.debug("Received [POST] insert_node")
@@ -103,7 +104,7 @@ def modify_node(request):
         route: The index of the route to modify
         lat: The latitude of the endpoint of edited segment
         lng: The longitude of the endpoint of edited segment
-        index: The segment ID of the segment to be edited     
+        index: The segment ID of the segment to be edited
     """
     try:
         log.debug("Received [POST] modify_node")
@@ -160,7 +161,7 @@ def delete_node(request):
 
     This expects a json body with the following parameters:
         route: The index of the route to edited
-        index: The segment ID of the segment to be deleted     
+        index: The segment ID of the segment to be deleted
     """
     try:
         log.debug("Received [DELETE] delete_node")
@@ -234,37 +235,67 @@ def get_traffic_data(request):
 
         wanted_data = []
 
+        start = time()
         for i in range(len(selections)):
             if selections[i]:
                 wanted_data.append(COLUMN_NAMES[i])
+        end = time()
+        print("Views 238: ", end-start)
 
+        start = time()
         route_segment_ids = get_route_segment_ids(USER, route)
         route_segments = get_route_segments(route_segment_ids)
+        end = time()
+        print("Views 245: ", end-start)
 
+        start = time()
         links_dirs_list = list(itertools.chain.from_iterable(
             [seg.link_dirs for seg in route_segments]))
         if len(links_dirs_list) <= 0:
             return HttpResponse("No route data to fetch.")
+        end = time()
+        print("Views 251: ", end-start)
 
+        start = time()
         route_here_data = TravelTime.get_data_for_route(
             links_dirs_list, date_range, days_of_week,
             hour_range)
+        end = time()
+        print("Views 259: : ", end-start)
 
+        start = time()
         response_csv = ",".join(wanted_data) + "\n"
+        end = time()
+        print("Views 267: ", end-start)
 
-        for record in route_here_data:
+        print("Length of route: ", len(route_here_data))
+        start = time()
+        for i in range(len(route_here_data)):
             wanted_vals = []
             for key in wanted_data:
-                wanted_vals.append(record[key])
+                wanted_vals.append(route_here_data[i][key])
             response_csv += ",".join([str(val) for val in wanted_vals])
             response_csv += '\n'
-
+        # response = qs_to_csv_response(route_here_data)
+        end = time()
+        print("Views 268: ", end-start)
+        # return response
         return HttpResponse(response_csv, content_type='text/csv')
 
     except KeyError as e:
         log.error(
             f"Got the following error during getTrafficData: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
+
+
+def qs_to_csv_response(qs):
+    sql, params = qs.query.sql_with_params()
+    sql = f"COPY ({sql}) TO STDOUT WITH (FORMAT CSV, HEADER, DELIMITER E'\t')"
+    response = HttpResponse(content_type='text/csv')
+    with connection.cursor() as cur:
+        sql = cur.mogrify(sql, params)
+        cur.copy_expert(sql, response)
+    return response
 
 
 def get_api_keys(request):

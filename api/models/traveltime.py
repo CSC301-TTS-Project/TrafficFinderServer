@@ -2,6 +2,8 @@ from botocore.compat import total_seconds
 from django.db import models
 from datetime import datetime
 from django.db import connection
+from api.models.link import Link
+from time import time
 
 
 class TravelTime(models.Model):
@@ -45,7 +47,6 @@ class TravelTime(models.Model):
 
         @precondition: link_dirs has at least one link.
         """
-
         start_time = datetime.strptime(
             f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
         end_time = datetime.strptime(
@@ -70,6 +71,7 @@ class TravelTime(models.Model):
                 f"(SELECT DISTINCT links.link_dir, ST_Length(ST_Transform(links.wkb_geometry, 2952)) "
                 f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
                 link_dirs)
+
             total_length = cursor.fetchone()[0]
             hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
                 .annotate(mean_speed=models.Avg('mean')) \
@@ -105,18 +107,21 @@ class TravelTime(models.Model):
 
         @precondition: link_dirs has at least one link.
         """
-
         start_time = datetime.strptime(
             f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
         end_time = datetime.strptime(
             f'{date_range[1]} {hour_range[1]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
 
+        start = time()
         hourly = TravelTime.objects \
             .filter(link_dir__in=link_dirs) \
             .filter(tx__range=[start_time, end_time]) \
             .filter(tx__hour__range=hour_range) \
             .filter(tx__iso_week_day__in=days_of_week) \
+            .values('link_dir') \
             .annotate(link_obs=models.Count(1))
+        end = time()
+        print("Hourly Model 117: ", end-start)
 
         # For whatever reason, the values length values in our DB aren't
         # correct. Recalculate them and related values.
@@ -135,14 +140,26 @@ class TravelTime(models.Model):
         # For whatever reason, the values length values in our DB aren't
         # correct. Recalculate them and related values.
         with connection.cursor() as cursor:
+
+            start = time()
             qs = ','.join('%s' for _ in range(len(link_dirs)))
-            cursor.execute(
-                f"SELECT SUM(length) "
-                f"FROM "
-                f"(SELECT DISTINCT links.link_dir, ST_Length(ST_Transform(links.wkb_geometry, 2952)) "
-                f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
-                link_dirs)
-            total_length = cursor.fetchone()[0]
+            cursor.execute(f"SELECT length, link_dir "
+                           f"FROM "
+                           f"(SELECT DISTINCT links.link_dir as link_dir, ST_Length(ST_Transform(links.wkb_geometry, 2952)) "
+                           f"as length FROM links WHERE links.link_dir in ({qs})) as lt",
+                           link_dirs)
+            end = time()
+            print("SQL Query 146: ", end - start)
+
+            start = time()
+            total_length = 0
+            for length, link_dir in cursor.fetchall():
+                total_length += length
+            end = time()
+            print("Total Length = ", total_length)
+            print("Summing over length 155: ", end-start)
+
+            start = time()
             hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
                 .annotate(mean_speed=models.Avg('mean')) \
                 .annotate(std_dev_speed=models.StdDev('mean')) \
@@ -156,10 +173,16 @@ class TravelTime(models.Model):
                                                         template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)")) \
                 .annotate(min_speed=models.Min('mean')) \
                 .annotate(max_speed=models.Max('mean'))
-            hourly = hourly.annotate(
+            end = time()
+            print("hourly 162: ", end-start)
+
+            start = time()
+            hourly = list(hourly.annotate(
                 full_link_obs=models.Value(
                     ((int((end_time - start_time).seconds) // 60) / 5) *
                     len(link_dirs),
-                    models.IntegerField()))
+                    models.IntegerField())).all())
+            end = time()
+            print("Hourly 179: ", end-start)
 
         return hourly
