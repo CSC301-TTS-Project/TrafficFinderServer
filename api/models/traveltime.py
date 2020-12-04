@@ -174,9 +174,7 @@ class TravelTime(models.Model):
             print("Summing over length 155: ", end-start)
 
             start = time()
-            hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
-                .annotate(mean_speed=models.Avg('mean')) \
-                .annotate(std_dev_speed=models.StdDev('mean')) \
+            hourly = hourly.annotate(std_dev_speed=models.StdDev('mean')) \
                 .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
                 .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
                                                         function="percentile_cont",
