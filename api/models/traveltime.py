@@ -164,6 +164,9 @@ class TravelTime(models.Model):
                         .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
                                                         function="percentile_cont",
                                                         template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
+                        .annotate(pct_95_speed=models.Aggregate(models.F("mean"),
+                                                        function="percentile_cont",
+                                                        template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)"))  \
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
                     cursor_query[entry['link_dir']] /= entry['mean']
