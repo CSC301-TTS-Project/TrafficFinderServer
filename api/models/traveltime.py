@@ -153,8 +153,20 @@ class TravelTime(models.Model):
 
             start = time()
             total_length = 0
-            for length, link_dir in cursor.fetchall():
-                total_length += length
+
+            cursor_query = {link_dir: float(length) for
+                            length, link_dir in cursor.fetchall()}
+            total_length = sum(cursor_query.values())
+            print(cursor_query)
+
+            hourly = hourly.annotate(mean=models.Avg("mean"))
+
+            for entry in hourly.all():
+                if entry['link_dir'] in cursor_query:
+                    cursor_query[entry['link_dir']] /= entry['mean']
+
+            harmonic_mean = sum(cursor_query.values()) / total_length
+
             end = time()
             print("Total Length = ", total_length)
             print("Summing over length 155: ", end-start)
