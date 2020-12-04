@@ -169,13 +169,19 @@ class TravelTime(models.Model):
                                                         template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)"))  \
                         .annotate(min_speed=models.Min('mean')) \
                         .annotate(max_speed=models.Max('mean'))
+
+            travel_times, standard_deviations, perc_85, perc_95, min_speeds, max_speeds = [], [], [], [], [], [] 
+
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
-                    cursor_query[entry['link_dir']] /= entry['mean']
+                    travel_times = cursor_query[entry['link_dir']] / entry['mean']
 
-            tt_mean = sum(cursor_query.values()) / \
-                len(cursor_query.values()) * 3600
+            length = len(travel_times)
+            tt_mean = sum(travel_times) / \
+                length * 3600
             harmonic_mean = sum(cursor_query.values()) / total_length
+            harmonic_std = sum(standard_deviations) / length
+
 
             end = time()
             print("Total Length = ", total_length)
