@@ -157,9 +157,8 @@ class TravelTime(models.Model):
             cursor_query = {link_dir: float(length) for
                             length, link_dir in cursor.fetchall()}
             total_length = sum(cursor_query.values())
-            print(cursor_query)
 
-            hourly = hourly.annotate(mean_speed=models.Avg("mean")/1000)\
+            hourly = hourly.annotate(mean_speed=models.Avg("mean"))\
                 .annotate(std_dev_speed=models.StdDev('mean')) \
                 .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
                 .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
@@ -178,9 +177,9 @@ class TravelTime(models.Model):
                 if entry['link_dir'] in cursor_query:
                     travel_times.append(
                         cursor_query[entry['link_dir']] / entry['mean_speed'])
-                std_tt.append(entry['std_dev_tt'])
                 perc_85.append(entry['pct_85_speed'])
                 perc_95.append(entry['pct_95_speed'])
+                std_tt.append(entry['std_dev_tt'])
                 min_speeds.append(entry['min_speed'])
                 max_speeds.append(entry['max_speed'])
                 link_obs.append(entry['link_obs'])
@@ -189,7 +188,7 @@ class TravelTime(models.Model):
             length = len(travel_times)
             tt_mean = sum(travel_times) / \
                 length * 3600
-            harmonic_mean = sum(cursor_query.values()) / total_length
+            harmonic_mean = total_length / sum(travel_times)
             harmonic_std_speed = sum(std_speed)/length
             harmonic_std_tt = sum(std_tt) / length
             harmonic_perc_85 = sum(perc_85)/length

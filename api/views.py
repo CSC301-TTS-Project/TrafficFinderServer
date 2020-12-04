@@ -270,12 +270,9 @@ def get_traffic_data(request):
 
         print("Length of route: ", len(route_here_data))
         start = time()
-        for i in range(len(route_here_data)):
-            wanted_vals = []
-            for key in wanted_data:
-                wanted_vals.append(route_here_data[i][key])
-            response_csv += ",".join([str(val) for val in wanted_vals])
-            response_csv += '\n'
+        response_csv += ",".join([str(route_here_data[key])
+                                  for key in wanted_data])
+        response_csv += '\n'
         # response = qs_to_csv_response(route_here_data)
         end = time()
         print("Views 268: ", end-start)
