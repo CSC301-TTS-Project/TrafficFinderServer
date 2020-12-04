@@ -185,8 +185,10 @@ class TravelTime(models.Model):
                         cursor_query[entry['link_dir']] / entry['min_speed'])
                     max_speeds.append(
                         cursor_query[entry['link_dir']] / entry['max_speed'])
-                    std_tt.append(entry['std_dev_tt'] * cursor_query[entry['link_dir']])
-                    std_speed.append(entry['std_dev_speed'] * cursor_query[entry['link_dir']])
+                    std_tt.append(entry['std_dev_tt'] *
+                                  cursor_query[entry['link_dir']])
+                    std_speed.append(
+                        entry['std_dev_speed'] * cursor_query[entry['link_dir']])
                 link_obs.append(entry['link_obs'])
 
             tt_mean = sum(travel_times) / len(travel_times) * 3600
