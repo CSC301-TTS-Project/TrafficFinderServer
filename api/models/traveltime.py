@@ -193,7 +193,7 @@ class TravelTime(models.Model):
             tt_mean = sum(travel_times) / \
                 length * 3600
             harmonic_mean = total_length / sum(travel_times)
-            harmonic_std_speed = sum(std_speed)/length
+            harmonic_std_speed = total_length / sum(std_speed)
             harmonic_std_tt = sum(std_tt) / length
             harmonic_perc_85 = sum(perc_85)/length
             harmonic_perc_95 = sum(perc_95)/length
