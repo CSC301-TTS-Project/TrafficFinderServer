@@ -183,8 +183,8 @@ class TravelTime(models.Model):
             harmonic_std = sum(standard_deviations) / length
             harmonic_perc_85 = sum(perc_85)/length
             harmonic_perc_05 = sum(perc_95)/length
-
-
+            harmonic_min = sum(min_speeds)/length
+            harmonic_max = sum(max_speeds)/length
 
             end = time()
             print("Total Length = ", total_length)
