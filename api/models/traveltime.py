@@ -159,12 +159,14 @@ class TravelTime(models.Model):
             total_length = sum(cursor_query.values())
             print(cursor_query)
 
-            hourly = hourly.annotate(mean=models.Avg("mean"))
+            hourly = hourly.annotate(mean=models.Avg("mean")/1000)
 
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
                     cursor_query[entry['link_dir']] /= entry['mean']
 
+            tt_mean = sum(cursor_query.values()) / \
+                len(cursor_query.values()) * 3600
             harmonic_mean = sum(cursor_query.values()) / total_length
 
             end = time()
@@ -175,7 +177,6 @@ class TravelTime(models.Model):
             hourly = hourly.annotate(total_length=models.Value(total_length, models.FloatField())) \
                 .annotate(mean_speed=models.Avg('mean')) \
                 .annotate(std_dev_speed=models.StdDev('mean')) \
-                .annotate(mean_tt=((total_length / 1000) / models.Avg('mean')) * 3600) \
                 .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
                 .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
                                                         function="percentile_cont",
