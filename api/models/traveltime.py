@@ -168,7 +168,7 @@ class TravelTime(models.Model):
                                                         function="percentile_cont",
                                                         template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)"))  \
                         .annotate(min_speed=models.Min('mean')) \
-                        .annotate(max_speed=models.Max('mean'))
+                        .annotate(max_speed=models.Max('mean')) \
 
             travel_times, standard_deviations, perc_85, perc_95, min_speeds, max_speeds = [], [], [], [], [], [] 
 
@@ -190,6 +190,7 @@ class TravelTime(models.Model):
             harmonic_perc_05 = sum(perc_95)/length
             harmonic_min = sum(min_speeds)/length
             harmonic_max = sum(max_speeds)/length
+            full_link_obs = ((int((end_time - start_time).seconds) // 60) / 5) * len(link_dirs)
             end = time()
             print("Total Length = ", total_length)
             print("Summing over length 155: ", end-start)
