@@ -159,7 +159,8 @@ class TravelTime(models.Model):
             total_length = sum(cursor_query.values())
             print(cursor_query)
 
-            hourly = hourly.annotate(mean=models.Avg("mean")/1000)
+            hourly = hourly.annotate(mean=models.Avg("mean")/1000)\
+                        .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600)
 
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
