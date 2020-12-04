@@ -160,6 +160,7 @@ class TravelTime(models.Model):
             print(cursor_query)
 
             hourly = hourly.annotate(mean=models.Avg("mean")/1000)\
+                        .annotate(std_dev_speed=models.StdDev('mean')) 
                         .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
                         .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
                                                         function="percentile_cont",
@@ -170,52 +171,31 @@ class TravelTime(models.Model):
                         .annotate(min_speed=models.Min('mean')) \
                         .annotate(max_speed=models.Max('mean')) \
 
-            travel_times, standard_deviations, perc_85, perc_95, min_speeds, max_speeds = [], [], [], [], [], [] 
+            travel_times, link_obs, std_speed, std_tt, perc_85, perc_95, min_speeds, max_speeds = [], [], [], [], [], [], [], []
 
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
                     travel_times.append(cursor_query[entry['link_dir']] / entry['mean'])
-                standard_deviations.append(entry['std_dev_tt'])
+                std_tt.append(entry['std_dev_tt'])
                 perc_85.append(entry['pct_85_speed'])
                 perc_95.append(entry['pct_95_speed'])
                 min_speeds.append(entry['min_speed'])
                 max_speeds.append(entry['max_speed'])
+                link_obs.append(entry['link_obs'])
+                std_speed.append(entry['std_dev_speed'])
 
             length = len(travel_times)
             tt_mean = sum(travel_times) / \
                 length * 3600
             harmonic_mean = sum(cursor_query.values()) / total_length
-            harmonic_std = sum(standard_deviations) / length
+            harmonic_std_speed = sum(std_speed)/length
+            harmonic_std_tt = sum(std_tt) / length
             harmonic_perc_85 = sum(perc_85)/length
-            harmonic_perc_05 = sum(perc_95)/length
+            harmonic_perc_95 = sum(perc_95)/length
             harmonic_min = sum(min_speeds)/length
             harmonic_max = sum(max_speeds)/length
+            link_obs_val = sum(link_obs)
             full_link_obs = ((int((end_time - start_time).seconds) // 60) / 5) * len(link_dirs)
             end = time()
-            print("Total Length = ", total_length)
-            print("Summing over length 155: ", end-start)
+            return {'route_num': 1, 'link_obs': link_obs_val,'total_length': total_length,'mean_speed': harmonic_mean,'std_dev_speed': harmonic_std_speed,'mean_tt': tt_mean,'std_dev_tt': harmonic_std_tt,'pct_85_speed': harmonic_perc_85,'pct_95_speed': harmonic_perc_95,'min_speed': harmonic_min,'max_speed': harmonic_max,'full_link_obs': full_link_obs}
 
-            start = time()
-            hourly = hourly.annotate(std_dev_speed=models.StdDev('mean')) \
-                .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
-                .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
-                                                        function="percentile_cont",
-                                                        template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
-                .annotate(pct_95_speed=models.Aggregate(models.F("mean"),
-                                                        function="percentile_cont",
-                                                        template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)")) \
-                .annotate(min_speed=models.Min('mean')) \
-                .annotate(max_speed=models.Max('mean'))
-            end = time()
-            print("hourly 162: ", end-start)
-
-            start = time()
-            hourly = list(hourly.annotate(
-                full_link_obs=models.Value(
-                    ((int((end_time - start_time).seconds) // 60) / 5) *
-                    len(link_dirs),
-                    models.IntegerField())).all())
-            end = time()
-            print("Hourly 179: ", end-start)
-
-        return hourly
