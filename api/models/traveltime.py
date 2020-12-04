@@ -160,8 +160,10 @@ class TravelTime(models.Model):
             print(cursor_query)
 
             hourly = hourly.annotate(mean=models.Avg("mean")/1000)\
-                        .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600)
-
+                        .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
+                        .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
+                                                        function="percentile_cont",
+                                                        template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
                     cursor_query[entry['link_dir']] /= entry['mean']
