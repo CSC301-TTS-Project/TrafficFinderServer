@@ -181,9 +181,11 @@ class TravelTime(models.Model):
                         cursor_query[entry['link_dir']] / entry['pct_85_speed'])
                     perc_95.append(
                         cursor_query[entry['link_dir']] / entry['pct_95_speed'])
+                    min_speeds.append(
+                        cursor_query[entry['link_dir']] / entry['min_speed'])
+                    max_speeds.append(
+                        cursor_query[entry['link_dir']] / entry['max_speed'])
                 std_tt.append(entry['std_dev_tt'])
-                min_speeds.append(entry['min_speed'])
-                max_speeds.append(entry['max_speed'])
                 link_obs.append(entry['link_obs'])
                 std_speed.append(entry['std_dev_speed'])
 
