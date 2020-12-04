@@ -181,6 +181,9 @@ class TravelTime(models.Model):
                 length * 3600
             harmonic_mean = sum(cursor_query.values()) / total_length
             harmonic_std = sum(standard_deviations) / length
+            harmonic_perc_85 = sum(perc_85)/length
+            harmonic_perc_05 = sum(perc_95)/length
+
 
 
             end = time()
