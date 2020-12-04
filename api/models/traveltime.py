@@ -35,7 +35,7 @@ class TravelTime(models.Model):
         }
 
     @staticmethod
-    def get_data_for_route_hourly(link_dirs, date_range, days_of_week, hour_range):
+    def get_data_for_route_hourly(route, link_dirs, date_range, days_of_week, hour_range):
         """
 
         Return hourly aggregated data for the passed links.
@@ -95,7 +95,7 @@ class TravelTime(models.Model):
         return hourly
 
     @staticmethod
-    def get_data_for_route(link_dirs, date_range, days_of_week, hour_range):
+    def get_data_for_route(route, link_dirs, date_range, days_of_week, hour_range):
         """
 
         Return aggregated data for the passed links.
@@ -159,7 +159,7 @@ class TravelTime(models.Model):
             total_length = sum(cursor_query.values())
             print(cursor_query)
 
-            hourly = hourly.annotate(mean=models.Avg("mean")/1000)\
+            hourly = hourly.annotate(mean_speed=models.Avg("mean")/1000)\
                 .annotate(std_dev_speed=models.StdDev('mean')) \
                 .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
                 .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
@@ -169,7 +169,7 @@ class TravelTime(models.Model):
                                                         function="percentile_cont",
                                                         template="%(function)s(0.95) WITHIN GROUP (ORDER BY %(expressions)s)"))  \
                 .annotate(min_speed=models.Min('mean')) \
-                .annotate(max_speed=models.Max('mean')) \
+                .annotate(max_speed=models.Max('mean'))
 
             travel_times, link_obs, std_speed, std_tt, perc_85, perc_95, min_speeds, max_speeds = [
             ], [], [], [], [], [], [], []
@@ -177,7 +177,7 @@ class TravelTime(models.Model):
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
                     travel_times.append(
-                        cursor_query[entry['link_dir']] / entry['mean'])
+                        cursor_query[entry['link_dir']] / entry['mean_speed'])
                 std_tt.append(entry['std_dev_tt'])
                 perc_85.append(entry['pct_85_speed'])
                 perc_95.append(entry['pct_95_speed'])
@@ -200,7 +200,8 @@ class TravelTime(models.Model):
             full_link_obs = (
                 (int((end_time - start_time).seconds) // 60) / 5) * len(link_dirs)
             end = time()
-            return {'route_num': 1, 'link_obs': link_obs_val, 'total_length': total_length,
+
+            return {'route_num': route, 'link_obs': link_obs_val, 'total_length': total_length,
                     'mean_speed': harmonic_mean, 'std_dev_speed': harmonic_std_speed, 'mean_tt': tt_mean,
                     'std_dev_tt': harmonic_std_tt, 'pct_85_speed': harmonic_perc_85, 'pct_95_speed': harmonic_perc_95,
                     'min_speed': harmonic_min, 'max_speed': harmonic_max, 'full_link_obs': full_link_obs}

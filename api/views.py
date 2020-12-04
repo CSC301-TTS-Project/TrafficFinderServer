@@ -257,9 +257,9 @@ def get_traffic_data(request):
         print("Views 251: ", end-start)
 
         start = time()
-        route_here_data = TravelTime.get_data_for_route(
-            links_dirs_list, date_range, days_of_week,
-            hour_range)
+        route_here_data = TravelTime.get_data_for_route(route,
+                                                        links_dirs_list, date_range, days_of_week,
+                                                        hour_range)
         end = time()
         print("Views 259: : ", end-start)
 
