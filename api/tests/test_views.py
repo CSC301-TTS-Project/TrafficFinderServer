@@ -135,7 +135,7 @@ class ViewTest(TestCase):
             'Content-Type', 'text/csv')
         print(response.content)
         assert response.content.startswith(
-            b'hour,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed\n')
+            b'route_num,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed\n')
 
     def test_get_api_keys(self):
         client = Client()
