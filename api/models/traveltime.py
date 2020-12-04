@@ -174,7 +174,12 @@ class TravelTime(models.Model):
 
             for entry in hourly.all():
                 if entry['link_dir'] in cursor_query:
-                    travel_times = cursor_query[entry['link_dir']] / entry['mean']
+                    travel_times.append(cursor_query[entry['link_dir']] / entry['mean'])
+                standard_deviations.append(entry['std_dev_tt'])
+                perc_85.append(entry['pct_85_speed'])
+                perc_95.append(entry['pct_95_speed'])
+                min_speeds.append(entry['min_speed'])
+                max_speeds.append(entry['max_speed'])
 
             length = len(travel_times)
             tt_mean = sum(travel_times) / \
@@ -185,7 +190,6 @@ class TravelTime(models.Model):
             harmonic_perc_05 = sum(perc_95)/length
             harmonic_min = sum(min_speeds)/length
             harmonic_max = sum(max_speeds)/length
-
             end = time()
             print("Total Length = ", total_length)
             print("Summing over length 155: ", end-start)
