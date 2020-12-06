@@ -114,7 +114,7 @@ class ViewTest(TestCase):
             path='/api/getTrafficData',
             data=json.dumps(
                 {
-                    'selections': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    'selections': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                     'route': 0,
                     'date_range': [
                         "2018-09-01",
@@ -135,7 +135,7 @@ class ViewTest(TestCase):
             'Content-Type', 'text/csv')
         print(response.content)
         assert response.content.startswith(
-            b'route_num,link_obs,total_length,mean_speed,std_dev_speed,mean_tt,std_dev_tt,pct_85_speed,pct_95_speed,min_speed,max_speed\n')
+            b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
 
     def test_get_api_keys(self):
         client = Client()
