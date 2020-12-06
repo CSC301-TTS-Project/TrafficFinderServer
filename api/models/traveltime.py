@@ -193,8 +193,8 @@ class TravelTime(models.Model):
             full_link_obs = (
                 (int((end_time - start_time).seconds) // 60) / 5) * len(link_dirs)
             end = time()
-            min_travel_time = min(min_tts)
-            max_travel_time = min(max_tts)
+            min_travel_time = min(min_tts) * 3600
+            max_travel_time = min(max_tts) * 3600
             median = total_length / sum(perc_50_tts)
 
             return {'route_num': route, 'num_days': num_days, 'link_obs': link_obs_val, 'total_length': total_length,
