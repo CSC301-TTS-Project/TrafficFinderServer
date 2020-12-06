@@ -111,9 +111,10 @@ class TravelTime(models.Model):
             f'{date_range[0]} {hour_range[0]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
         end_time = datetime.strptime(
             f'{date_range[1]} {hour_range[1]}:00', '%Y-%m-%d %H:%M').replace(tzinfo=None)
+        num_days = (end_time-start_time).days
 
         start = time()
-        hourly = TravelTime.objects \
+        link_aggregated = TravelTime.objects \
             .filter(link_dir__in=link_dirs) \
             .filter(tx__range=[start_time, end_time]) \
             .filter(tx__hour__range=hour_range) \
@@ -123,22 +124,6 @@ class TravelTime(models.Model):
         end = time()
         print("Hourly Model 117: ", end-start)
 
-        # For whatever reason, the values length values in our DB aren't
-        # correct. Recalculate them and related values.
-        # with connection.cursor() as cursor:
-        #     qs = ','.join('%s' for _ in range(len(link_dirs)))
-        #     cursor.execute(
-        #         f"SELECT DISTINCT travel_time.link_dir, length "
-        #         f"FROM travel_time WHERE travel_time.link_dir in ({qs})",
-        #         link_dirs)
-        #     lengths = cursor.fetchall()
-
-        #     total_length = 0
-        #     for l in lengths:
-        #         total_length += l[1]
-
-        # For whatever reason, the values length values in our DB aren't
-        # correct. Recalculate them and related values.
         with connection.cursor() as cursor:
 
             start = time()
@@ -158,9 +143,12 @@ class TravelTime(models.Model):
                             length, link_dir in cursor.fetchall()}
             total_length = sum(cursor_query.values())
 
-            hourly = hourly.annotate(mean_speed=models.Avg("mean"))\
+            link_aggregated = link_aggregated.annotate(mean_speed=models.Avg("mean"))\
                 .annotate(std_dev_speed=models.StdDev('mean')) \
                 .annotate(std_dev_tt=((total_length / 1000) / models.StdDev('mean')) * 3600) \
+                .annotate(pct_50_speed=models.Aggregate(models.F("mean"),
+                                                        function="percentile_cont",
+                                                        template="%(function)s(0.50) WITHIN GROUP (ORDER BY %(expressions)s)")) \
                 .annotate(pct_85_speed=models.Aggregate(models.F("mean"),
                                                         function="percentile_cont",
                                                         template="%(function)s(0.85) WITHIN GROUP (ORDER BY %(expressions)s)")) \
@@ -170,41 +158,47 @@ class TravelTime(models.Model):
                 .annotate(min_speed=models.Min('mean')) \
                 .annotate(max_speed=models.Max('mean'))
 
-            travel_times, link_obs, std_speed, std_tt, perc_85, perc_95, min_speeds, max_speeds = [
-            ], [], [], [], [], [], [], []
+            travel_times, link_obs, std_speeds, std_tts, perc_85_tts, perc_95_tts, perc_50_tts, min_tts, max_tts = [
+            ], [], [], [], [], [], [], [], []
 
-            for entry in hourly.all():
+            for entry in link_aggregated.all():
                 if entry['link_dir'] in cursor_query:
                     travel_times.append(
                         cursor_query[entry['link_dir']] / entry['mean_speed'])
-                    perc_85.append(
+                    perc_85_tts.append(
                         cursor_query[entry['link_dir']] / entry['pct_85_speed'])
-                    perc_95.append(
+                    perc_95_tts.append(
                         cursor_query[entry['link_dir']] / entry['pct_95_speed'])
-                    min_speeds.append(
+                    perc_50_tts.append(
+                        cursor_query[entry['link_dir']] / entry['pct_50_speed'])
+                    min_tts.append(
                         cursor_query[entry['link_dir']] / entry['min_speed'])
-                    max_speeds.append(
+                    max_tts.append(
                         cursor_query[entry['link_dir']] / entry['max_speed'])
-                    std_tt.append(entry['std_dev_tt'] *
-                                  cursor_query[entry['link_dir']])
-                    std_speed.append(
+                    std_tts.append(entry['std_dev_tt'] *
+                                   cursor_query[entry['link_dir']])
+                    std_speeds.append(
                         entry['std_dev_speed'] * cursor_query[entry['link_dir']])
                 link_obs.append(entry['link_obs'])
 
             tt_mean = sum(travel_times) / len(travel_times) * 3600
             harmonic_mean = total_length / sum(travel_times)
-            harmonic_std_speed = sum(std_speed) / total_length
-            harmonic_std_tt = sum(std_tt) / total_length
-            harmonic_perc_85 = total_length / sum(perc_85)
-            harmonic_perc_95 = total_length / sum(perc_95)
-            harmonic_min = total_length / sum(min_speeds)
-            harmonic_max = total_length / sum(max_speeds)
+            harmonic_std_speed = sum(std_speeds) / total_length
+            harmonic_std_tt = sum(std_tts) / total_length
+            harmonic_perc_85 = total_length / sum(perc_85_tts)
+            harmonic_perc_95 = total_length / sum(perc_95_tts)
+            harmonic_min = total_length / sum(min_tts)
+            harmonic_max = total_length / sum(max_tts)
             link_obs_val = sum(link_obs)
             full_link_obs = (
                 (int((end_time - start_time).seconds) // 60) / 5) * len(link_dirs)
             end = time()
+            min_travel_time = min(min_tts)
+            max_travel_time = min(max_tts)
+            median = total_length / sum(perc_50_tts)
 
-            return {'route_num': route, 'link_obs': link_obs_val, 'total_length': total_length,
+            return {'route_num': route, 'num_days': num_days, 'link_obs': link_obs_val, 'total_length': total_length,
                     'mean_speed': harmonic_mean, 'std_dev_speed': harmonic_std_speed, 'mean_tt': tt_mean,
                     'std_dev_tt': harmonic_std_tt, 'pct_85_speed': harmonic_perc_85, 'pct_95_speed': harmonic_perc_95,
-                    'min_speed': harmonic_min, 'max_speed': harmonic_max, 'full_link_obs': full_link_obs}
+                    'min_speed': harmonic_min, 'max_speed': harmonic_max, 'full_link_obs': full_link_obs,
+                    'min_tt': min_travel_time, 'max_tt': max_travel_time, 'pct_50_speed': median}
