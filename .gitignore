@@ -3,9 +3,9 @@ __pycache__/
  *.pyc
 local.ini
 .coverage
+.idea
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-.idea/workspace.xml
