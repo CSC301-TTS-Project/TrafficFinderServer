@@ -118,7 +118,8 @@ def modify_node(request):
             return HttpResponseBadRequest(
                 f"Passed segment_idx {segment_idx} out of bounds.")
         new_node = Node.objects.nearest_node(lat, lng)
-        ret_json = {}
+        ret_json = {"new_node": new_node.to_json(), "segment_updates": {}}
+
         if segment_idx - 1 >= 0:
             # There is a prev segment. Route from prev node to new node
             prev_node_segment = get_route_segments(
@@ -131,9 +132,8 @@ def modify_node(request):
         else:
             # This is the first node.
             modified_segment = Segment.singular(new_node)
-            update_route_segment(USER, route, segment_idx,
-                                 modified_segment)
-        ret_json[segment_idx] = modified_segment.to_json()
+            update_route_segment(USER, route, segment_idx, modified_segment)
+        ret_json["segment_updates"][segment_idx] = modified_segment.to_json()
 
         if segment_idx + 1 < len(segment_ids):
             # There is a next segment. Route from new node to next node.
@@ -142,9 +142,9 @@ def modify_node(request):
             successor_node = successor_node_segment.end_node
             new_successor_segment = Segment.route_segment_between_nodes(
                 new_node, successor_node)
-            update_route_segment(USER, route, segment_idx,
+            update_route_segment(USER, route, segment_idx + 1,
                                  new_successor_segment)
-            ret_json[segment_idx + 1] = new_successor_segment.to_json()
+            ret_json["segment_updates"][segment_idx + 1] = new_successor_segment.to_json()
 
         # return any edits.
         return JsonResponse(ret_json, safe=False)
