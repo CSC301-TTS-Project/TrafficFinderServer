@@ -59,6 +59,7 @@ def insert_node(request):
         index: The segment ID of the new segment to be created
     """
     try:
+        USER = request.user.id
         log.debug("Received [POST] insert_node")
         json_data = json.loads(request.body)
         route = int(json_data["route"])
@@ -116,6 +117,7 @@ def modify_node(request):
         index: The segment ID of the segment to be edited
     """
     try:
+        USER = request.user.id
         log.debug("Received [POST] modify_node")
         json_data = json.loads(request.body)
         route = json_data["route"]
@@ -179,7 +181,7 @@ def delete_node(request):
         json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = json_data["index"]
-
+        USER = request.user.id
         segment_ids = get_route_segment_ids(USER, route)
         if not 0 <= segment_idx < len(segment_ids):
             return HttpResponseBadRequest(
@@ -244,6 +246,7 @@ def get_traffic_data(request):
         days_of_week = [int(day) for day in json_data["days_of_week"]]
         hour_range = [int(hr) for hr in json_data["hour_range"]]
         selections = [int(select) for select in json_data["selections"]]
+        USER = request.user.id
 
         wanted_data = []
 
@@ -335,7 +338,7 @@ def signup_user(request):
         password = request.POST['password']
         email = request.POST['email']
         user = User.objects.create_user(username, email, password)
-        user.DBUser.user_number =
+        return redirect('/map')
     except (KeyError, ValueError) as e:
         log.error(
             f"Got the following error during login_user: {traceback.format_exc()}")
