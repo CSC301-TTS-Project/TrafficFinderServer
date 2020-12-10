@@ -2,6 +2,8 @@ import itertools
 
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
 import json
+
+from django.http.response import HttpResponseNotAllowed
 from .ddb_actions import get_route_segments, get_route_segment_ids, insert_route_segment, \
     update_route_segment, delete_route_segment
 from django.conf import settings
@@ -11,6 +13,10 @@ from .api_keys import api_keys_dict
 import traceback
 from django.db import connection
 from time import time
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import redirect
+from django.contrib.auth.models import User
 
 # Set this in config, should be set using auth header later
 USER = settings.DEFAULT_DDB_USER_ID
@@ -24,6 +30,7 @@ def index(request):
     return HttpResponse("Hello World!")
 
 
+@login_required(login_url='/login')
 def get_route(request):
     """ Expect the json field route """
     log.debug("Received [POST] get_route")
@@ -40,6 +47,7 @@ def get_route(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@login_required(login_url='/login')
 def insert_node(request):
     """
     Insert segment into a route
@@ -96,6 +104,7 @@ def insert_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@login_required(login_url='/login')
 def modify_node(request):
     """
     Modify segment in a route
@@ -144,7 +153,8 @@ def modify_node(request):
                 new_node, successor_node)
             update_route_segment(USER, route, segment_idx + 1,
                                  new_successor_segment)
-            ret_json["segment_updates"][segment_idx + 1] = new_successor_segment.to_json()
+            ret_json["segment_updates"][segment_idx +
+                                        1] = new_successor_segment.to_json()
 
         # return any edits.
         return JsonResponse(ret_json, safe=False)
@@ -155,6 +165,7 @@ def modify_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@login_required(login_url='/login')
 def delete_node(request):
     """
     Delete segment in a route
@@ -209,6 +220,7 @@ def delete_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@login_required(login_url='/login')
 def get_traffic_data(request):
     """
     Get traffic data in csv format.
@@ -285,6 +297,7 @@ def get_traffic_data(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@login_required(login_url='/login')
 def qs_to_csv_response(qs):
     sql, params = qs.query.sql_with_params()
     sql = f"COPY ({sql}) TO STDOUT WITH (FORMAT CSV, HEADER, DELIMITER E'\t')"
@@ -295,5 +308,40 @@ def qs_to_csv_response(qs):
     return response
 
 
+@login_required(login_url='/login')
 def get_api_keys(request):
     return JsonResponse(api_keys_dict(), safe=False)
+
+
+def login_user(request):
+    try:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            redirect('/map')
+        else:
+            return HttpResponseNotAllowed("User Does Not Exist")
+    except (KeyError, ValueError) as e:
+        log.error(
+            f"Got the following error during login_user: {traceback.format_exc()}")
+        return HttpResponseBadRequest("Malformed Input")
+
+
+def signup_user(request):
+    try:
+        username = request.POST['username']
+        password = request.POST['password']
+        email = request.POST['email']
+        user = User.objects.create_user(username, email, password)
+        user.DBUser.user_number =
+    except (KeyError, ValueError) as e:
+        log.error(
+            f"Got the following error during login_user: {traceback.format_exc()}")
+        return HttpResponseBadRequest("Malformed Input")
+
+
+def logout_user(request):
+    logout(request)
+    return redirect('/login')
