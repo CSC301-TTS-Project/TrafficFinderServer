@@ -84,87 +84,99 @@ class ViewTest(TestCase):
             'coordinates': [[-79.63473, 43.75079], [-79.6347, 43.75094], [-79.6347, 43.75126]]
         }])
 
-    # def test_delete_node(self):
-    #     client = Client()
-    #     response_1 = client.post('/api/insertNode', json.dumps({
-    #         'route': 0,
-    #         'lat': 43.75079,
-    #         'lng': -79.63473,
-    #         'index': 0
-    #     }), content_type="application/json")
-    #     self.assertEqual(response_1.status_code, 200)
+    def test_delete_node(self):
+        client = Client()
+        response = client.post('/api/login_user',
+                               json.dumps({'username': "TestUser",
+                                           'password': "qwerty"}),
+                               content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        token = "Token " + json.loads(response.content)["token"]
+        response_1 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75079,
+            'lng': -79.63473,
+            'index': 0
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_1.status_code, 200)
 
-    #     response_2 = client.post('/api/insertNode', json.dumps({
-    #         'route': 0,
-    #         'lat': 43.75126,
-    #         'lng': -79.6347,
-    #         'index': 1
-    #     }), content_type="application/json")
-    #     self.assertEqual(response_2.status_code, 200)
+        response_2 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75126,
+            'lng': -79.6347,
+            'index': 1
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_2.status_code, 200)
 
-    #     response_3 = client.delete('/api/deleteNode', json.dumps({
-    #         'route': 0,
-    #         'index': 1
-    #     }), content_type="application/json")
+        response_3 = client.delete('/api/deleteNode', json.dumps({
+            'route': 0,
+            'index': 1
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
 
-    #     self.assertEqual(response_3.status_code, 200)
-    #     # should be empty
-    #     self.assertEqual(json.loads(response_3.content), {})
+        self.assertEqual(response_3.status_code, 200)
+        # should be empty
+        self.assertEqual(json.loads(response_3.content), {})
 
-    #     response = client.generic(
-    #         method="GET", path='/api/getRoute', data=json.dumps({'route': 0}))
+        response = client.post('/api/getRoute', json.dumps(
+            {'route': 0}), content_type="application/json", HTTP_AUTHORIZATION=token)
 
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(json.loads(response.content), [{
-    #         'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
-    #         'end_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473}, 'coordinates': []
-    #     }])
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), [{
+            'start_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473},
+            'end_node': {'id': 30326191, 'lat': 43.75079, 'lng': -79.63473}, 'coordinates': []
+        }])
 
-    # def test_get_traffic_data(self):
-    #     client = Client()
+    def test_get_traffic_data(self):
+        client = Client()
+        response = client.post('/api/login_user',
+                               json.dumps({'username': "TestUser",
+                                           'password': "qwerty"}),
+                               content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        token = "Token " + json.loads(response.content)["token"]
+        response_1 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75079,
+            'lng': -79.63473,
+            'index': 0
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_1.status_code, 200)
+        response_2 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.744883,
+            'lng': -79.610741,
+            'index': 1
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_2.status_code, 200)
 
-    #     response_1 = client.post('/api/insertNode', json.dumps({
-    #         'route': 0,
-    #         'lat': 43.75079,
-    #         'lng': -79.63473,
-    #         'index': 0
-    #     }), content_type="application/json")
-    #     self.assertEqual(response_1.status_code, 200)
-    #     response_2 = client.post('/api/insertNode', json.dumps({
-    #         'route': 0,
-    #         'lat': 43.744883,
-    #         'lng': -79.610741,
-    #         'index': 1
-    #     }), content_type="application/json")
-    #     self.assertEqual(response_2.status_code, 200)
+        response = client.post(
+            '/api/getTrafficData',
+            json.dumps(
+                {
+                    'selections': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    'route': 0,
+                    'date_range': [
+                        "2018-09-01",
+                        "2018-09-07"],
+                    'days_of_week': [
+                        0,
+                        3,
+                        5],
+                    'hour_range': [
+                        7,
+                        13]}),
+            content_type="application/json",
+            HTTP_AUTHORIZATION=token)
 
-    #     response = client.generic(
-    #         method="GET",
-    #         path='/api/getTrafficData',
-    #         data=json.dumps(
-    #             {
-    #                 'selections': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-    #                 'route': 0,
-    #                 'date_range': [
-    #                     "2018-09-01",
-    #                     "2018-09-07"],
-    #                 'days_of_week': [
-    #                     0,
-    #                     3,
-    #                     5],
-    #                 'hour_range': [
-    #                     7,
-    #                     13]}))
+        # Corresponds to traffic data for route
+        # https://jsfiddle.net/dh4w9ez2/12/
 
-    #     # Corresponds to traffic data for route
-    #     # https://jsfiddle.net/dh4w9ez2/12/
-
-    #     assert response.status_code == 200
-    #     assert response._headers['content-type'] == (
-    #         'Content-Type', 'text/csv')
-    #     print(response.content)
-    #     assert response.content.startswith(
-    #         b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
+        assert response.status_code == 200
+        assert response._headers['content-type'] == (
+            'Content-Type', 'text/csv')
+        print(response.content)
+        assert response.content.startswith(
+            b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
 
     # def test_get_api_keys(self):
     #     client = Client()
