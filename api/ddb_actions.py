@@ -62,17 +62,18 @@ def _get_route_table(reset_table=False):
         finally:
             _ROUTE_TABLE = _get_ddb().Table(_DDB_ROUTE_TABLE_NAME)
             _ROUTE_TABLE.wait_until_exists()
-
-            # initialize default route; implementation will change for
-            # deliverable 3
-            _ROUTE_TABLE.put_item(
-                Item={
-                    "UserId": settings.DEFAULT_DDB_USER_ID,
-                    "Route": settings.DEFAULT_ROUTE,
-                    "SegmentIds": []
-                }
-            )
     return _ROUTE_TABLE
+
+
+def add_user_route(user_id, route):
+    _get_route_table().put_item(
+        Item={
+            "UserId": str(user_id),
+            "Route": route,
+            "SegmentIds": []
+        }
+    )
+
 
 
 def _get_segment_table(reset_table=False):
@@ -116,7 +117,7 @@ def get_route_segment_ids(user_id, route):
     @return: ordered list of segment ids
     """
     response = _get_route_table().get_item(
-        Key={'UserId': user_id, 'Route': route},
+        Key={'UserId': str(user_id), 'Route': route},
         ConsistentRead=True)
     if "Item" in response.keys():
         return response['Item']['SegmentIds']
@@ -175,7 +176,7 @@ def insert_route_segment(user_id, route, index, segment):
     new_segment_list.insert(index, new_segment_id)
     _get_route_table().update_item(
         Key={
-            'UserId': user_id,
+            'UserId': str(user_id),
             'Route': route
         },
         AttributeUpdates={
@@ -206,7 +207,7 @@ def update_route_segment(user_id, route, index, segment):
     new_segment_list[index] = new_segment_id
     _get_route_table().update_item(
         Key={
-            'UserId': user_id,
+            'UserId': str(user_id),
             'Route': route
         },
         AttributeUpdates={
@@ -240,7 +241,7 @@ def delete_route_segment(user_id, route, index):
 
     _get_route_table().update_item(
         Key={
-            'UserId': user_id,
+            'UserId': str(user_id),
             'Route': route
         },
         AttributeUpdates={

@@ -5,7 +5,7 @@ import json
 
 from django.http.response import HttpResponseNotAllowed
 from .ddb_actions import get_route_segments, get_route_segment_ids, insert_route_segment, \
-    update_route_segment, delete_route_segment
+    update_route_segment, delete_route_segment, add_user_route
 from django.conf import settings
 from api.models import Node, Segment, TravelTime
 import logging
@@ -15,14 +15,14 @@ from django.db import connection
 from time import time
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect
 from django.contrib.auth.models import User
 
 # Set this in config, should be set using auth header later
-USER = settings.DEFAULT_DDB_USER_ID
+DEFAULT_ROUTE = settings.DEFAULT_ROUTE
 
 log = logging.getLogger(__name__)
-COLUMN_NAMES = "route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length,full_link_obs".split(
+COLUMN_NAMES = "route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed," \
+               "std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length,full_link_obs".split(
     ",")
 
 
@@ -35,9 +35,10 @@ def get_route(request):
     """ Expect the json field route """
     log.debug("Received [POST] get_route")
     try:
+        user = request.user.id
         json_data = json.loads(request.body)
         route = int(json_data["route"])
-        route_segment_ids = get_route_segment_ids(USER, route)
+        route_segment_ids = get_route_segment_ids(user, route)
         route_segments = get_route_segments(route_segment_ids)
         return JsonResponse([segment.to_json()
                              for segment in route_segments], safe=False)
@@ -59,7 +60,7 @@ def insert_node(request):
         index: The segment ID of the new segment to be created
     """
     try:
-        USER = request.user.id
+        user = request.user.id
         log.debug("Received [POST] insert_node")
         json_data = json.loads(request.body)
         route = int(json_data["route"])
@@ -71,12 +72,12 @@ def insert_node(request):
         ret_json = {}
         if segment_idx == 0:
             new_segment = Segment.singular(new_node)
-            insert_route_segment(USER, route, segment_idx, new_segment)
+            insert_route_segment(user, route, segment_idx, new_segment)
             ret_json[segment_idx] = new_segment.to_json()
             return JsonResponse(ret_json, safe=False)
         else:
             # route to new node
-            segment_ids = get_route_segment_ids(USER, route)
+            segment_ids = get_route_segment_ids(user, route)
 
             if not 0 <= segment_idx < len(segment_ids) + 1:
                 return HttpResponseBadRequest(
@@ -95,9 +96,9 @@ def insert_node(request):
                 new_successor_segment = Segment.route_segment_between_nodes(
                     new_node, successor_node)
                 update_route_segment(
-                    USER, route, segment_idx + 1, new_successor_segment)
+                    user, route, segment_idx + 1, new_successor_segment)
                 ret_json[segment_idx + 1] = new_successor_segment.to_json()
-            insert_route_segment(USER, route, segment_idx, new_segment)
+            insert_route_segment(user, route, segment_idx, new_segment)
         return JsonResponse(ret_json, safe=False)
     except (KeyError, ValueError) as e:
         log.error(
@@ -117,14 +118,14 @@ def modify_node(request):
         index: The segment ID of the segment to be edited
     """
     try:
-        USER = request.user.id
+        user = request.user.id
         log.debug("Received [POST] modify_node")
         json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = int(json_data["index"])
         lat = float(json_data["lat"])
         lng = float(json_data["lng"])
-        segment_ids = get_route_segment_ids(USER, route)
+        segment_ids = get_route_segment_ids(user, route)
         if not 0 <= segment_idx < len(segment_ids):
             return HttpResponseBadRequest(
                 f"Passed segment_idx {segment_idx} out of bounds.")
@@ -139,11 +140,11 @@ def modify_node(request):
             modified_segment = Segment.route_segment_between_nodes(
                 prev_node, new_node)
             update_route_segment(
-                USER, route, segment_idx, modified_segment)
+                user, route, segment_idx, modified_segment)
         else:
             # This is the first node.
             modified_segment = Segment.singular(new_node)
-            update_route_segment(USER, route, segment_idx, modified_segment)
+            update_route_segment(user, route, segment_idx, modified_segment)
         ret_json["segment_updates"][segment_idx] = modified_segment.to_json()
 
         if segment_idx + 1 < len(segment_ids):
@@ -153,7 +154,7 @@ def modify_node(request):
             successor_node = successor_node_segment.end_node
             new_successor_segment = Segment.route_segment_between_nodes(
                 new_node, successor_node)
-            update_route_segment(USER, route, segment_idx + 1,
+            update_route_segment(user, route, segment_idx + 1,
                                  new_successor_segment)
             ret_json["segment_updates"][segment_idx +
                                         1] = new_successor_segment.to_json()
@@ -181,8 +182,8 @@ def delete_node(request):
         json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = json_data["index"]
-        USER = request.user.id
-        segment_ids = get_route_segment_ids(USER, route)
+        user = request.user.id
+        segment_ids = get_route_segment_ids(user, route)
         if not 0 <= segment_idx < len(segment_ids):
             return HttpResponseBadRequest(
                 f"Passed segment_idx {segment_idx} out of bounds.")
@@ -201,7 +202,7 @@ def delete_node(request):
             new_successor_segment = Segment.route_segment_between_nodes(
                 prev_node, successor_node)
             update_route_segment(
-                USER, route, segment_idx + 1, new_successor_segment)
+                user, route, segment_idx + 1, new_successor_segment)
             ret_json[segment_idx] = new_successor_segment.to_json()
         elif segment_idx + 1 < len(segment_ids):
             # deleting first node
@@ -210,11 +211,11 @@ def delete_node(request):
             successor_node = successor_node_segment.end_node
             new_starting_segment = Segment.singular(successor_node)
             update_route_segment(
-                USER, route, segment_idx + 1, new_starting_segment)
+                user, route, segment_idx + 1, new_starting_segment)
             ret_json[segment_idx] = new_starting_segment.to_json()
         # otherwise, don't need to send back updates since it was the last node
         # segment that was deleted
-        delete_route_segment(USER, route, segment_idx)
+        delete_route_segment(user, route, segment_idx)
         return JsonResponse(ret_json, safe=False)
     except (KeyError, ValueError) as e:
         log.error(
@@ -246,7 +247,7 @@ def get_traffic_data(request):
         days_of_week = [int(day) for day in json_data["days_of_week"]]
         hour_range = [int(hr) for hr in json_data["hour_range"]]
         selections = [int(select) for select in json_data["selections"]]
-        USER = request.user.id
+        user = request.user.id
 
         wanted_data = []
 
@@ -255,13 +256,13 @@ def get_traffic_data(request):
             if selections[i]:
                 wanted_data.append(COLUMN_NAMES[i])
         end = time()
-        print("Views 238: ", end-start)
+        print("Views 238: ", end - start)
 
         start = time()
-        route_segment_ids = get_route_segment_ids(USER, route)
+        route_segment_ids = get_route_segment_ids(user, route)
         route_segments = get_route_segments(route_segment_ids)
         end = time()
-        print("Views 245: ", end-start)
+        print("Views 245: ", end - start)
 
         start = time()
         links_dirs_list = list(itertools.chain.from_iterable(
@@ -269,19 +270,19 @@ def get_traffic_data(request):
         if len(links_dirs_list) <= 0:
             return HttpResponse("No route data to fetch.")
         end = time()
-        print("Views 251: ", end-start)
+        print("Views 251: ", end - start)
 
         start = time()
         route_here_data = TravelTime.get_data_for_route(route,
                                                         links_dirs_list, date_range, days_of_week,
                                                         hour_range)
         end = time()
-        print("Views 259: : ", end-start)
+        print("Views 259: : ", end - start)
 
         start = time()
         response_csv = ",".join(wanted_data) + "\n"
         end = time()
-        print("Views 267: ", end-start)
+        print("Views 267: ", end - start)
 
         print("Length of route: ", len(route_here_data))
         start = time()
@@ -290,7 +291,7 @@ def get_traffic_data(request):
         response_csv += '\n'
         # response = qs_to_csv_response(route_here_data)
         end = time()
-        print("Views 268: ", end-start)
+        print("Views 268: ", end - start)
         # return response
         return HttpResponse(response_csv, content_type='text/csv')
 
@@ -323,7 +324,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            redirect('/map')
+            return HttpResponse("Login Success")
         else:
             return HttpResponseNotAllowed("User Does Not Exist")
     except (KeyError, ValueError) as e:
@@ -338,13 +339,14 @@ def signup_user(request):
         password = request.POST['password']
         email = request.POST['email']
         user = User.objects.create_user(username, email, password)
-        return redirect('/map')
+        add_user_route(user.id, DEFAULT_ROUTE)
+        return HttpResponse("Signup Success")
     except (KeyError, ValueError) as e:
         log.error(
-            f"Got the following error during login_user: {traceback.format_exc()}")
+            f"Got the following error during signup_user: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 
 def logout_user(request):
     logout(request)
-    return redirect('/login')
+    return HttpResponse("Signout Success")
