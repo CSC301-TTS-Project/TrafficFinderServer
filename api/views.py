@@ -1,14 +1,9 @@
-from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_200_OK
-)
-from rest_framework.decorators import api_view, permission_classes
+
+from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 import itertools
 
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 import json
 
 from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed
@@ -19,10 +14,8 @@ from api.models import Node, Segment, TravelTime
 import logging
 from .api_keys import api_keys_dict
 import traceback
-from django.db import connection
 from time import time
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
@@ -57,13 +50,6 @@ def get_route(request):
         log.error(
             f"Got the following error during get_route: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
-
-
-# def check(request):
-#     if not request.user.is_authenticated:
-#         print("User did not exist")
-#         return HttpResponseForbidden("User must be signed in")
-#     return HttpResponse("Success")
 
 
 @api_view(["POST"])
