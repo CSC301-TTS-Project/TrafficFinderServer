@@ -317,32 +317,28 @@ def get_traffic_data(request):
 
 @api_view(["GET"])
 def get_api_keys(request):
+    """
+    Get API keys for Mapbox and Here.
+
+    Expects an empty json body
+
+    @return: JSON Object
+    """
     if not request.user.is_authenticated:
         return HttpResponseForbidden("User must be signed in")
     return JsonResponse(api_keys_dict(), safe=False)
 
 
 @csrf_exempt
-def login_user(request):
-    try:
-        username = request.POST['username']
-        password = request.POST['password']
-        print(username)
-        print(password)
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return HttpResponse("Login Success")
-        else:
-            return HttpResponseNotAllowed("User Does Not Exist")
-    except (KeyError, ValueError) as e:
-        log.error(
-            f"Got the following error during login_user: {traceback.format_exc()}")
-        return HttpResponseBadRequest("Malformed Input")
-
-
-@csrf_exempt
 def signup_user(request):
+    """
+    Only request which is CSRF exempt. Does not require a token to access/
+
+    Expects a POST request with fields username, password, and email
+
+    @return: JSON Object with key "token". Place the token in any future requests
+    with header: Authorization = f'Token {token}' 
+    """
     try:
         username = request.POST['username']
         password = request.POST['password']
