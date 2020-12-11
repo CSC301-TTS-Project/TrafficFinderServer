@@ -329,12 +329,14 @@ def get_traffic_data(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@api_view(["GET"])
 def get_api_keys(request):
     if not request.user.is_authenticated:
         return HttpResponseForbidden("User must be signed in")
     return JsonResponse(api_keys_dict(), safe=False)
 
 
+@csrf_exempt
 def login_user(request):
     try:
         username = request.POST['username']
