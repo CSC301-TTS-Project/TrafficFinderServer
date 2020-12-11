@@ -367,22 +367,3 @@ def signup_user(request):
         log.error(
             f"Got the following error during signup_user: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
-
-
-@api_view(["POST"])
-def extra_view(request):
-    if not request.user:
-        print("No User property")
-        return HttpResponseForbidden("No User")
-    else:
-        print(request.user)
-        print(request.user.is_authenticated)
-        print(request.user.id)
-        return HttpResponse("Done")
-
-
-@api_view(["POST"])
-def logout_user(request):
-    print(request.user.is_authenticated)
-    logout(request.user)
-    return HttpResponse("Signout Success")

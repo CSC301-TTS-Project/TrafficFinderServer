@@ -12,6 +12,4 @@ urlpatterns = [
     path('getTrafficData', get_traffic_data),
     path('login_user', views.obtain_auth_token),
     path('signup_user', signup_user),
-    path('logout_user', logout_user),
-    path('extra', extra_view)
 ]
