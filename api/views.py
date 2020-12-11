@@ -3,7 +3,7 @@ import itertools
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
 import json
 
-from django.http.response import HttpResponseNotAllowed
+from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed
 from .ddb_actions import get_route_segments, get_route_segment_ids, insert_route_segment, \
     update_route_segment, delete_route_segment, add_user_route
 from django.conf import settings
@@ -16,6 +16,7 @@ from time import time
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 # Set this in config, should be set using auth header later
 DEFAULT_ROUTE = settings.DEFAULT_ROUTE
@@ -23,17 +24,18 @@ DEFAULT_ROUTE = settings.DEFAULT_ROUTE
 log = logging.getLogger(__name__)
 COLUMN_NAMES = "route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed," \
                "std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length,full_link_obs".split(
-    ",")
+                   ",")
 
 
 def index(request):
     return HttpResponse("Hello World!")
 
 
-@login_required(login_url='/login')
 def get_route(request):
     """ Expect the json field route """
     log.debug("Received [POST] get_route")
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User must be signed in")
     try:
         user = request.user.id
         json_data = json.loads(request.body)
@@ -48,7 +50,13 @@ def get_route(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-@login_required(login_url='/login')
+def check(request):
+    if not request.user.is_authenticated:
+        print("User did not exist")
+        return HttpResponseForbidden("User must be signed in")
+    return HttpResponse("Success")
+
+
 def insert_node(request):
     """
     Insert segment into a route
@@ -59,9 +67,13 @@ def insert_node(request):
         lng: The longitude of the endpoint of new segment
         index: The segment ID of the new segment to be created
     """
+    log.debug("Received [POST] insert_node")
+    print(request.user)
+    if not request.user.is_authenticated:
+        print("User did not exist")
+        return HttpResponseForbidden("User must be signed in")
     try:
         user = request.user.id
-        log.debug("Received [POST] insert_node")
         json_data = json.loads(request.body)
         route = int(json_data["route"])
         lat = float(json_data["lat"])
@@ -106,7 +118,6 @@ def insert_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-@login_required(login_url='/login')
 def modify_node(request):
     """
     Modify segment in a route
@@ -117,9 +128,11 @@ def modify_node(request):
         lng: The longitude of the endpoint of edited segment
         index: The segment ID of the segment to be edited
     """
+    log.debug("Received [POST] modify_node")
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User must be signed in")
     try:
         user = request.user.id
-        log.debug("Received [POST] modify_node")
         json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = int(json_data["index"])
@@ -168,7 +181,6 @@ def modify_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-@login_required(login_url='/login')
 def delete_node(request):
     """
     Delete segment in a route
@@ -177,8 +189,10 @@ def delete_node(request):
         route: The index of the route to edited
         index: The segment ID of the segment to be deleted
     """
+    log.debug("Received [DELETE] delete_node")
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User must be signed in")
     try:
-        log.debug("Received [DELETE] delete_node")
         json_data = json.loads(request.body)
         route = json_data["route"]
         segment_idx = json_data["index"]
@@ -223,7 +237,6 @@ def delete_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-@login_required(login_url='/login')
 def get_traffic_data(request):
     """
     Get traffic data in csv format.
@@ -240,6 +253,8 @@ def get_traffic_data(request):
     @return: csv body with hourly aggregated traffic data for the time window
     """
     log.debug("Received [POST] getTrafficData")
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User must be signed in")
     try:
         json_data = json.loads(request.body)
         route = int(json_data["route"])
@@ -301,19 +316,9 @@ def get_traffic_data(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-@login_required(login_url='/login')
-def qs_to_csv_response(qs):
-    sql, params = qs.query.sql_with_params()
-    sql = f"COPY ({sql}) TO STDOUT WITH (FORMAT CSV, HEADER, DELIMITER E'\t')"
-    response = HttpResponse(content_type='text/csv')
-    with connection.cursor() as cur:
-        sql = cur.mogrify(sql, params)
-        cur.copy_expert(sql, response)
-    return response
-
-
-@login_required(login_url='/login')
 def get_api_keys(request):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User must be signed in")
     return JsonResponse(api_keys_dict(), safe=False)
 
 
@@ -321,6 +326,8 @@ def login_user(request):
     try:
         username = request.POST['username']
         password = request.POST['password']
+        print(username)
+        print(password)
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
@@ -339,12 +346,26 @@ def signup_user(request):
         password = request.POST['password']
         email = request.POST['email']
         user = User.objects.create_user(username, email, password)
+        user = authenticate(request, username=username, password=password)
+        token = Token.objects.create(user=user)
         add_user_route(user.id, DEFAULT_ROUTE)
-        return HttpResponse("Signup Success")
+        print(token.key)
+        return JsonResponse({'token': token.key}, safe=False)
     except (KeyError, ValueError) as e:
         log.error(
             f"Got the following error during signup_user: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
+
+
+def extra_view(request):
+    if not request.user:
+        print("No User property")
+        return HttpResponseForbidden("No User")
+    else:
+        print(request.user)
+        print(request.user.is_authenticated)
+        print(request.user.id)
+        return HttpResponse("Done")
 
 
 def logout_user(request):

@@ -9,3 +9,5 @@ local.ini
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+api/models/dbuser.py
+traffic_finder_server/settings.py
