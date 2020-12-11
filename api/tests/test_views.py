@@ -174,7 +174,6 @@ class ViewTest(TestCase):
         assert response.status_code == 200
         assert response._headers['content-type'] == (
             'Content-Type', 'text/csv')
-        print(response.content)
         assert response.content.startswith(
             b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
 
@@ -186,7 +185,7 @@ class ViewTest(TestCase):
                                content_type="application/json")
         self.assertEqual(response.status_code, 200)
         token = "Token " + json.loads(response.content)["token"]
-        response = client.post('/api/getKeys', HTTP_AUTHORIZATION=token)
+        response = client.get('/api/getKeys', HTTP_AUTHORIZATION=token)
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(json.loads(response.content))
 
@@ -230,7 +229,7 @@ class ViewTest(TestCase):
         }), content_type="application/json", HTTP_AUTHORIZATION=token)
         self.assertEqual(response_3.status_code, 200)
 
-        response_modify = client.post('/api/modifyNode', json.dumps({
+        response_modify = client.patch('/api/modifyNode', json.dumps({
             'route': 0,
             'index': 3,
             'lat': 43.747965,
