@@ -1,3 +1,11 @@
+from rest_framework.response import Response
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_200_OK
+)
+from rest_framework.decorators import api_view, permission_classes
+from django.views.decorators.csrf import csrf_exempt
 import itertools
 
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError, JsonResponse
@@ -31,6 +39,7 @@ def index(request):
     return HttpResponse("Hello World!")
 
 
+@api_view(["POST"])
 def get_route(request):
     """ Expect the json field route """
     log.debug("Received [POST] get_route")
@@ -50,13 +59,14 @@ def get_route(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-def check(request):
-    if not request.user.is_authenticated:
-        print("User did not exist")
-        return HttpResponseForbidden("User must be signed in")
-    return HttpResponse("Success")
+# def check(request):
+#     if not request.user.is_authenticated:
+#         print("User did not exist")
+#         return HttpResponseForbidden("User must be signed in")
+#     return HttpResponse("Success")
 
 
+@api_view(["POST"])
 def insert_node(request):
     """
     Insert segment into a route
@@ -118,6 +128,7 @@ def insert_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@api_view(["PATCH"])
 def modify_node(request):
     """
     Modify segment in a route
@@ -181,6 +192,7 @@ def modify_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@api_view(["POST"])
 def delete_node(request):
     """
     Delete segment in a route
@@ -237,6 +249,7 @@ def delete_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@api_view(["POST"])
 def get_traffic_data(request):
     """
     Get traffic data in csv format.
@@ -340,16 +353,15 @@ def login_user(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@csrf_exempt
 def signup_user(request):
     try:
         username = request.POST['username']
         password = request.POST['password']
         email = request.POST['email']
         user = User.objects.create_user(username, email, password)
-        user = authenticate(request, username=username, password=password)
         token = Token.objects.create(user=user)
         add_user_route(user.id, DEFAULT_ROUTE)
-        print(token.key)
         return JsonResponse({'token': token.key}, safe=False)
     except (KeyError, ValueError) as e:
         log.error(
@@ -357,6 +369,7 @@ def signup_user(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
+@api_view(["POST"])
 def extra_view(request):
     if not request.user:
         print("No User property")
@@ -368,6 +381,8 @@ def extra_view(request):
         return HttpResponse("Done")
 
 
+@api_view(["POST"])
 def logout_user(request):
-    logout(request)
+    print(request.user.is_authenticated)
+    logout(request.user)
     return HttpResponse("Signout Success")
