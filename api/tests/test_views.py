@@ -175,7 +175,8 @@ class ViewTest(TestCase):
         assert response._headers['content-type'] == (
             'Content-Type', 'text/csv')
         assert response.content.startswith(
-            b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
+            b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,'
+            b'std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
 
     def test_get_api_keys(self):
         client = Client()
@@ -239,6 +240,16 @@ class ViewTest(TestCase):
 
         assert json.loads(response_modify.content) == {
             "new_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
-            "segment_updates": {"3": {"start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
-                                      "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
-                                      "coordinates": [[-79.63243, 43.74774], [-79.63183, 43.74789], [-79.63147, 43.74798], [-79.63134, 43.74801]]}}}
+            "segment_updates": {
+                "3": {
+                    "start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
+                    "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
+                    "coordinates": [
+                      [-79.63243, 43.74774],
+                      [-79.63183, 43.74789],
+                      [-79.63147, 43.74798],
+                      [-79.63134, 43.74801]
+                    ]
+                }
+            }
+        }

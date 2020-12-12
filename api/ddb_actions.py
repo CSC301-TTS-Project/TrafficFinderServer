@@ -75,7 +75,6 @@ def add_user_route(user_id, route):
     )
 
 
-
 def _get_segment_table(reset_table=False):
     global _SEQUENCE_TABLE
     if not _SEQUENCE_TABLE or reset_table:

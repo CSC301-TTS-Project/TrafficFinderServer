@@ -315,8 +315,10 @@ def get_traffic_data(request):
             f"Got the following error during getTrafficData: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
+
 @api_view(["POST"])
 def get_route_as_geojson(request):
+    """Get the details of the route in a geo_json format."""
     log.debug("Received [POST] getTrafficData")
     if not request.user.is_authenticated:
         return HttpResponseForbidden("User must be signed in")
@@ -362,7 +364,7 @@ def signup_user(request):
     Expects a POST request with fields username, password, and email
 
     @return: JSON Object with key "token". Place the token in any future requests
-    with header: Authorization = f'Token {token}' 
+    with header: Authorization = f'Token {token}'
     """
     try:
         username = request.POST['username']
