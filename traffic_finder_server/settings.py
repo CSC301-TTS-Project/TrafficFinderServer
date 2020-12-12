@@ -148,6 +148,10 @@ else:
 
     HERE_PUBLIC_KEY = str(os.environ[config['API_KEYS']['HERE_ENV_VAR']])
     MAPBOX_PUBLIC_KEY = str(os.environ[config['API_KEYS']['MAPBOX_ENV_VAR']])
+    # Uncomment below line and comment above lines if path variables not set for MAPBOX and HERE
+    # HERE_PUBLIC_KEY = "NONE"
+    # MAPBOX_PUBLIC_KEY = "pk.eyJ1Ijoiam9sbHlyZWRmbGFtZXMiLCJhIjoiY2toZmZvOXdlMG" + \
+    #     "RwazJybWc4Z3NqeXcyaSJ9.iuPYI7z-cWdavtJWeMvuWg"
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 

@@ -180,7 +180,7 @@ def modify_node(request):
         return HttpResponseBadRequest("Malformed Input")
 
 
-@api_view(["POST"])
+@api_view(["DELETE"])
 def delete_node(request):
     """
     Delete segment in a route
