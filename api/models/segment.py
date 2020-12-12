@@ -41,8 +41,7 @@ class Segment:
         return {
             'start_node': self.start_node.to_json(),
             'end_node': self.end_node.to_json(),
-            'coordinates': self.coordinates,
-            'link_dirs': self.link_dirs
+            'coordinates': self.coordinates
         }
 
     def to_geojson_feature(self):
