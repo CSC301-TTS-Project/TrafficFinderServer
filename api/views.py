@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 import itertools
 
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, FileResponse
 import json
 
 from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed
@@ -18,6 +18,7 @@ from time import time
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.core.serializers import serialize
 
 # Set this in config, should be set using auth header later
 DEFAULT_ROUTE = settings.DEFAULT_ROUTE
@@ -312,6 +313,30 @@ def get_traffic_data(request):
     except KeyError as e:
         log.error(
             f"Got the following error during getTrafficData: {traceback.format_exc()}")
+        return HttpResponseBadRequest("Malformed Input")
+
+@api_view(["POST"])
+def get_route_as_geojson(request):
+    log.debug("Received [POST] getTrafficData")
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User must be signed in")
+    try:
+        json_data = json.loads(request.body)
+        route = int(json_data["route"])
+        user = request.user.id
+        route_segment_ids = get_route_segment_ids(user, route)
+        route_segments = get_route_segments(route_segment_ids)
+        ret_geo_json = {
+            'type': 'FeatureCollection',
+            "metadata": {
+                "user": request.user.username
+            },
+            "features": [segment.to_geojson_feature() for segment in route_segments]
+        }
+        return JsonResponse(ret_geo_json, content_type="application/geo+json")
+    except KeyError as e:
+        log.error(
+            f"Got the following error during getGeoJSON: {traceback.format_exc()}")
         return HttpResponseBadRequest("Malformed Input")
 
 
