@@ -3,6 +3,7 @@ from api.ddb_actions import reset
 from django.test import TestCase, Client
 import json
 from django.conf import settings
+import geojson
 
 
 class ViewTest(TestCase):
@@ -175,7 +176,8 @@ class ViewTest(TestCase):
         assert response._headers['content-type'] == (
             'Content-Type', 'text/csv')
         assert response.content.startswith(
-            b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
+            b'route_num,num_days,link_obs,min_speed,mean_speed,max_speed,pct_50_speed,pct_85_speed,pct_95_speed,'
+            b'std_dev_speed,min_tt,mean_tt,max_tt,std_dev_tt,total_length\n')
 
     def test_get_api_keys(self):
         client = Client()
@@ -239,6 +241,44 @@ class ViewTest(TestCase):
 
         assert json.loads(response_modify.content) == {
             "new_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
-            "segment_updates": {"3": {"start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
-                                      "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
-                                      "coordinates": [[-79.63243, 43.74774], [-79.63183, 43.74789], [-79.63147, 43.74798], [-79.63134, 43.74801]]}}}
+            "segment_updates": {
+                "3": {
+                    "start_node": {"id": 30326160, "lat": 43.74774, "lng": -79.63243},
+                    "end_node": {"id": 1182083962, "lat": 43.74801, "lng": -79.63134},
+                    "coordinates": [
+                      [-79.63243, 43.74774],
+                      [-79.63183, 43.74789],
+                      [-79.63147, 43.74798],
+                      [-79.63134, 43.74801]
+                    ]
+                }
+            }
+        }
+
+    def test_get_geo_json(self):
+        client = Client()
+        response = client.post('/api/login_user',
+                               json.dumps({'username': "TestUser",
+                                           'password': "qwerty"}),
+                               content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        token = "Token " + json.loads(response.content)["token"]
+        response_1 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75079,
+            'lng': -79.63473,
+            'index': 0
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_1.status_code, 200)
+        response_2 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.744883,
+            'lng': -79.610741,
+            'index': 1
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_2.status_code, 200)
+
+        response3 = client.post('/api/getGeoJson',
+                                json.dumps({'route': 0}),
+                                content_type="application/json", HTTP_AUTHORIZATION=token)
+        assert geojson.loads(response3.content).is_valid
