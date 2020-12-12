@@ -3,6 +3,7 @@ from api.ddb_actions import reset
 from django.test import TestCase, Client
 import json
 from django.conf import settings
+import geojson
 
 
 class ViewTest(TestCase):
@@ -253,3 +254,31 @@ class ViewTest(TestCase):
                 }
             }
         }
+
+    def test_get_geo_json(self):
+        client = Client()
+        response = client.post('/api/login_user',
+                               json.dumps({'username': "TestUser",
+                                           'password': "qwerty"}),
+                               content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        token = "Token " + json.loads(response.content)["token"]
+        response_1 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.75079,
+            'lng': -79.63473,
+            'index': 0
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_1.status_code, 200)
+        response_2 = client.post('/api/insertNode', json.dumps({
+            'route': 0,
+            'lat': 43.744883,
+            'lng': -79.610741,
+            'index': 1
+        }), content_type="application/json", HTTP_AUTHORIZATION=token)
+        self.assertEqual(response_2.status_code, 200)
+
+        response3 = client.post('/api/getGeoJson',
+                                json.dumps({'route': 0}),
+                                content_type="application/json", HTTP_AUTHORIZATION=token)
+        assert geojson.loads(response3.content).is_valid

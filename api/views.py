@@ -20,6 +20,7 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.core.serializers import serialize
 
+
 # Set this in config, should be set using auth header later
 DEFAULT_ROUTE = settings.DEFAULT_ROUTE
 
@@ -333,7 +334,8 @@ def get_route_as_geojson(request):
             "metadata": {
                 "user": request.user.username
             },
-            "features": [segment.to_geojson_feature() for segment in route_segments]
+            "features": [segment.to_geojson_feature() for segment
+                         in filter(lambda x: len(x.coordinates) >= 2, route_segments)]
         }
         return JsonResponse(ret_geo_json, content_type="application/geo+json")
     except KeyError as e:
