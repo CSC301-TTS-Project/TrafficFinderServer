@@ -11,8 +11,10 @@
 
 4. Fill out traffic_finder_server / config / local.ini with relevant fields for your setup(database, database users, and table names etc.)
 
-5. Do django migrations: `python3 manage.py makemigrations & & python3 manage.py migrate`
+5. Export the required HERE and MAPBOX API keys based on your local configuration.
 
-6. Run tests: `python manage.py test --keepdb --nologcapture`
+6. Do django migrations: `python3 manage.py makemigrations & & python3 manage.py migrate`
 
-7. Run backend: `python manage.py runserver`
+7. Run tests: `python manage.py test --keepdb --nologcapture`
+
+8. Run backend: `python manage.py runserver`
