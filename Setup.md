@@ -1,6 +1,6 @@
 # Local Setup
 
-1. Install PostgreSQL 9.6.11 with PostGIS 2.3.7 and pgRouting 2.4.2. Get the database dump from: https: // drive.google.com / file / d / 1VMj94tSTRI8mglgsfmKW2wdMxEyUBEmw / view?usp = sharing
+1. Install PostgreSQL 9.6.11 with PostGIS 2.3.7 and pgRouting 2.4.2. Get the database dump from: https://drive.google.com/file/d/1VMj94tSTRI8mglgsfmKW2wdMxEyUBEmw/view?usp=sharing
 * Note: supposedly this step has issues with certain dependencies not fully working on windows
 
 2. Setup venv and install python dependencies: `python3 - m pip install - r requirements.txt`
