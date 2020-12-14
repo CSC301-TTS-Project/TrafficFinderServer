@@ -7,9 +7,9 @@
 
 3. Install AWS cli and run aws configure
 
-3. Install and run local DynamoDB: https://docs.aws.amazon.com / amazondynamodb / latest / developerguide / DynamoDBLocal.DownloadingAndRunning.html
+3. Install and run local DynamoDB: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html
 
-4. Fill out traffic_finder_server / config / local.ini with relevant fields for your setup(database, database users, and table names etc.)
+4. Fill out traffic_finder_server/config/local.ini with relevant fields for your setup(database, database users, and table names etc.)
 
 5. Export the required HERE and MAPBOX API keys based on your local configuration.
 
